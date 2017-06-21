@@ -1,0 +1,159 @@
+---
+title: "benchmark"
+author: "Mike Jiang"
+date: "May 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+```{r}
+library(microbenchmark)
+library(Matrix)
+library(data.table)
+library(RSQLite)
+library(rhdf5)
+library(lz4)
+library(ggplot2)
+path <- "/loc/no-backup/mike/shared"
+path <- file.path(path, "benchmark")
+source("IO.R")
+source("simulate_sparse_mat.R")
+```
+
+
+
+## benchmark different formats
+```{r, echo=FALSE}
+nGenes <- 3e4
+nSampleSize <- 1e3
+set.seed(4)
+nCellsVec <- c(3e2, 1e3, 4e3, 7e3, 2e4, 5e4,1e5,5e5)[2:6]
+beta_values <- data.frame(alpha = c(0.1, 0.2, 0.3, 0.4), beta = c(0.8, 0.9, 0.7, 0.6))
+cidx <- sample(nGenes, nSampleSize)
+ntime <- 5
+# Rprof()
+
+benchmarkfile <- file.path(path,paste0("dt_", paste(nGenes, sep = "_"), ".rds"))
+if(!file.exists(benchmarkfile))
+ { res <- apply(beta_values, 1, function(beta_value){
+    
+              alpha <- beta_value[1]
+              beta <- beta_value[2]
+              res <- lapply(nCellsVec, function(nCells){
+                suffix <- paste(alpha, beta, nGenes, nCells, sep = "_")
+                ridx <- sample(nCells, nSampleSize)
+                
+                #in-memory mat
+                matfile <- file.path(path, paste0("mat_", suffix,".rds"))
+                if(!file.exists(matfile))
+                {
+                  mat <- simulate_sparse_mat_fast2(alpha, beta, nCells)  
+                  saveRDS(mat, file = matfile)
+                }else
+                  mat <- readRDS(matfile)
+                  
+                sparsity <- 1- nnzero(mat)/(nCells * nGenes)
+                size <- object.size(mat)/1e9
+                timing <- microbenchmark(dd <- mat[ridx,], dd <- mat[, cidx], sub1 <- mat[ridx, cidx], times = ntime, unit = "ms")
+                timing <- summary(timing)[["mean"]]
+                dt1 <- data.table(nCells = nCells
+                                  , format = "in-memory sparsed 2d mat"
+                                  , size = size
+                                  , slicing = c("row", "col", "row&col")
+                                  , time = timing)
+                # browser()
+              
+                
+                #sqlite(lz4)
+                # compress <- "lz4"
+                # dbfile <- file.path(path, paste0("blob_",compress, suffix,".sqlite"))
+                # db_sqlite <- writeDB.blobs(mat, dbfile, nGenes, compress)
+                # dt2 <- benchmark_sql(dbfile, db_sqlite, ridx, cidx, compress, ntime)
+              
+                #sqlite(gzip)
+                compress <- "gzip"
+                dbfile <- file.path(path, paste0("blob_",compress, suffix,".sqlite"))
+                db_sqlite <- writeDB.blobs(mat, dbfile, nGenes, compress)
+                size <- file.size(dbfile) /1e9
+                timing <- microbenchmark(dd <- readDB.blobs(db_sqlite, ridx, NULL, compress)
+                                         ,dd <-  readDB.blobs(db_sqlite, NULL, cidx, compress)
+                                         , sub2 <- readDB.blobs(db_sqlite, ridx, cidx, compress)
+                                         , times = ntime, unit = "ms")
+                timing <- summary(timing)[["mean"]]
+                dt3 <- data.table(nCells = nCells
+                           , format = paste0("sqlite(", compress, ")")
+                           , size = size
+                           , slicing = c("row", "col", "row&col")
+                           , time = timing)
+                              
+                #h5 
+                h5file <- file.path(path, paste0("compressed_", suffix, ".h5"))
+                H5write.blocks(mat, h5file, nGenes, nCells)
+                
+                size <- file.size(h5file) /1e9
+                # timing <- microbenchmark(dd <- h5read(h5file, "data", list(ridx, NULL))
+                #                          ,dd <-  h5read(h5file, "data", list(NULL, cidx))
+                #                          , sub3 <- h5read(h5file, "data", list(ridx, cidx))
+                #                          , times = ntime, unit = "ms")
+                # 
+                # 
+                # 
+                # timing <- summary(timing)[["mean"]]
+                # dt4 <- data.table(nCells = nCells
+                #                   , format = "H5(2d mat)"
+                #                   , size = size
+                #                   , slicing = c("row", "col", "row&col")
+                #                   , time = timing)
+                
+                #chunked.read.h5
+                
+  
+                # browser()
+                timing <- microbenchmark(dd <- h5read.chunked(h5file, "data", list(ridx, NULL), nGenes)
+                                         ,dd <-  h5read.chunked(h5file, "data", list(NULL, cidx), nGenes)
+                                         , sub4 <- h5read.chunked(h5file, "data", list(ridx, cidx), nGenes)
+                                         , times = ntime, unit = "ms")
+                
+                
+                H5close()
+                timing <- summary(timing)[["mean"]]
+                dt5 <- data.table(nCells = nCells
+                                  , format = "H5(chunked.read)"
+                                  , size = size
+                                  , slicing = c("row", "col", "row&col")
+                                  , time = timing)
+                
+                sub1 <- as.matrix(sub1)
+                # browser()
+                #TODO: check all.equal(sub1, sub2, check.attributes = F)
+                if(!all.equal(sub1, sub2, check.attributes = F)||!all.equal(sub1, sub4, check.attributes = F))
+                  stop("wrong reading!")
+                thisRes <- rbindlist(list(dt1, dt3, dt5))
+                thisRes[, sparsity:=sparsity]
+                thisRes[, beta_value := paste0("alpha = ", alpha, " beta = ", beta)]
+              })
+              rbindlist(res)
+            })
+  # Rprof(NULL)
+  # summaryRprof()
+  dt <- rbindlist(res)
+  saveRDS(dt, file = benchmarkfile)
+}else
+  dt <- readRDS(benchmarkfile)
+```
+
+## sparsity (zero-value rate)
+```{r}
+dt[, unique(sparsity), by = list(nCells, beta_value)]
+```
+
+## plot the result
+```{r fig.width=14}
+ggplot(dt, aes(y = time, x = nCells, color = format)) + geom_line() + geom_point() + facet_grid(slicing~beta_value, scales ="free") + ylab("time (ms)") + scale_x_continuous(breaks = nCellsVec) + ggtitle("time") + scale_y_log10()
+
+ggplot(dt[format != "H5(chunked.read)"], aes(x = nCells, y = size, color = format)) + geom_line() + geom_point() + facet_wrap(~beta_value) + ylab("size (GB)") + scale_x_continuous(breaks = nCellsVec) + ggtitle("space")
+```
+
+
