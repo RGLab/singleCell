@@ -9,3 +9,7 @@ h5write1 <- function(data, filename, ds_name, colIndx) {
     .Call('singleCell_h5write1', PACKAGE = 'singleCell', data, filename, ds_name, colIndx)
 }
 
+h5read1 <- function(filename, ds_name, colIndx) {
+    .Call('singleCell_h5read1', PACKAGE = 'singleCell', filename, ds_name, colIndx)
+}
+

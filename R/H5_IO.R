@@ -18,7 +18,7 @@ h5read.chunked <- function(h5, name, index, ncol){
     blocks <- 1
   col.grps <- split(cind, blocks)
   res <- lapply(col.grps, function(i){
-    sub <- h5read(h5, name, list(NULL, i))
+    sub <- h5read1(h5, name, i)
     # browser()
     if(!is.null(rind))
       sub <- sub[rind, ]
@@ -37,7 +37,7 @@ H5write.blocks <- function(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", 
   
   h5createFile(h5file)
   if(is.null(nLevel))
-    nLevel <- ifelse(compress == "lz4", 3, 6)
+    nLevel <- ifelse(compress == "lz4", -1, 6)
   
   h5createDataset1(h5file, "data", rev(c(nrow, ncol)), storage_mode = "double"
                    , chunk_dims = rev(c(nrow, 1))#note that H5 dims start with col

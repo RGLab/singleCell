@@ -8,18 +8,17 @@ output: html_document
 ```{r setup, include=FALSE,echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
-```{r}
+```{r, echo=FALSE}
 library(microbenchmark)
 library(Matrix)
 library(data.table)
-library(RSQLite)
+# library(RSQLite)
 library(rhdf5)
-library(lz4)
+library(singleCell)
 library(ggplot2)
+Sys.setenv(HDF5_PLUGIN_PATH="/home/wjiang2/mylib/lib")
 path <- "/loc/no-backup/mike/shared"
 path <- file.path(path, "benchmark")
-source("IO.R")
-source("simulate_sparse_mat.R")
 ```
 
 
@@ -73,24 +72,27 @@ if(!file.exists(benchmarkfile))
                 # dt2 <- benchmark_sql(dbfile, db_sqlite, ridx, cidx, compress, ntime)
               
                 #sqlite(gzip)
-                compress <- "gzip"
-                dbfile <- file.path(path, paste0("blob_",compress, suffix,".sqlite"))
-                db_sqlite <- writeDB.blobs(mat, dbfile, nGenes, compress)
-                size <- file.size(dbfile) /1e9
-                timing <- microbenchmark(dd <- readDB.blobs(db_sqlite, ridx, NULL, compress)
-                                         ,dd <-  readDB.blobs(db_sqlite, NULL, cidx, compress)
-                                         , sub2 <- readDB.blobs(db_sqlite, ridx, cidx, compress)
-                                         , times = ntime, unit = "ms")
-                timing <- summary(timing)[["mean"]]
-                dt3 <- data.table(nCells = nCells
-                           , format = paste0("sqlite(", compress, ")")
-                           , size = size
-                           , slicing = c("row", "col", "row&col")
-                           , time = timing)
+                # compress <- "gzip"
+                # dbfile <- file.path(path, paste0("blob_",compress, suffix,".sqlite"))
+                # db_sqlite <- writeDB.blobs(mat, dbfile, nGenes, compress)
+                # size <- file.size(dbfile) /1e9
+                # timing <- microbenchmark(dd <- readDB.blobs(db_sqlite, ridx, NULL, compress)
+                #                          ,dd <-  readDB.blobs(db_sqlite, NULL, cidx, compress)
+                #                          , sub2 <- readDB.blobs(db_sqlite, ridx, cidx, compress)
+                #                          , times = ntime, unit = "ms")
+                # timing <- summary(timing)[["mean"]]
+                # dt3 <- data.table(nCells = nCells
+                #            , format = paste0("sqlite(", compress, ")")
+                #            , size = size
+                #            , slicing = c("row", "col", "row&col")
+                #            , time = timing)
+                # 
                               
                 #h5 
+                compress <- "gzip"
                 h5file <- file.path(path, paste0("compressed_", suffix, ".h5"))
-                H5write.blocks(mat, h5file, nGenes, nCells)
+                if(!file.exists(h5file))
+                  H5write.blocks(mat, h5file, nGenes, nCells, compress)
                 
                 size <- file.size(h5file) /1e9
                 # timing <- microbenchmark(dd <- h5read(h5file, "data", list(ridx, NULL))
@@ -113,24 +115,46 @@ if(!file.exists(benchmarkfile))
                 # browser()
                 timing <- microbenchmark(dd <- h5read.chunked(h5file, "data", list(ridx, NULL), nGenes)
                                          ,dd <-  h5read.chunked(h5file, "data", list(NULL, cidx), nGenes)
-                                         , sub4 <- h5read.chunked(h5file, "data", list(ridx, cidx), nGenes)
+                                         , sub5 <- h5read.chunked(h5file, "data", list(ridx, cidx), nGenes)
                                          , times = ntime, unit = "ms")
                 
                 
                 H5close()
                 timing <- summary(timing)[["mean"]]
                 dt5 <- data.table(nCells = nCells
-                                  , format = "H5(chunked.read)"
+                                  , format = paste0("H5(chunked.read)", compress)
                                   , size = size
                                   , slicing = c("row", "col", "row&col")
                                   , time = timing)
                 
-                sub1 <- as.matrix(sub1)
+                
+                
+                #h5 lz4
+                compress <- "lz4"
+                h5file <- file.path(path, paste0("compressed_",compress, "_", suffix, ".h5"))
+                if(!file.exists(h5file))
+                  H5write.blocks(mat, h5file, nGenes, nCells, compress)
+                
+                size <- file.size(h5file) /1e9
+                timing <- microbenchmark(dd <- h5read.chunked(h5file, "data", list(ridx, NULL), nGenes)
+                                         ,dd <-  h5read.chunked(h5file, "data", list(NULL, cidx), nGenes)
+                                         , sub6 <- h5read.chunked(h5file, "data", list(ridx, cidx), nGenes)
+                                         , times = ntime, unit = "ms")
+                
+                
+                H5close()
+                timing <- summary(timing)[["mean"]]
+                dt6 <- data.table(nCells = nCells
+                                  , format = paste0("H5(chunked.read)", compress)
+                                  , size = size
+                                  , slicing = c("row", "col", "row&col")
+                                  , time = timing)
                 # browser()
+                sub1 <- as.matrix(sub1)
                 #TODO: check all.equal(sub1, sub2, check.attributes = F)
-                if(!all.equal(sub1, sub2, check.attributes = F)||!all.equal(sub1, sub4, check.attributes = F))
+                if(!(isTRUE(all.equal(sub1, sub5, check.attributes = F, tol = 2e-8))&&isTRUE(all.equal(sub1, sub6, check.attributes = F, tol = 2e-8))))
                   stop("wrong reading!")
-                thisRes <- rbindlist(list(dt1, dt3, dt5))
+                thisRes <- rbindlist(list(dt1, dt6, dt5))
                 thisRes[, sparsity:=sparsity]
                 thisRes[, beta_value := paste0("alpha = ", alpha, " beta = ", beta)]
               })

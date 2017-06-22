@@ -35,3 +35,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// h5read1
+NumericVector h5read1(std::string filename, std::string ds_name, std::vector<int> colIndx);
+RcppExport SEXP singleCell_h5read1(SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP colIndxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type ds_name(ds_nameSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type colIndx(colIndxSEXP);
+    rcpp_result_gen = Rcpp::wrap(h5read1(filename, ds_name, colIndx));
+    return rcpp_result_gen;
+END_RCPP
+}

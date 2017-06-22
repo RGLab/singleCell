@@ -4,7 +4,7 @@
 \alias{h5read.chunked}
 \title{the API only reads data from H5 by chunks (entire columns)}
 \usage{
-h5read.chunked(h5, name, index, nGenes)
+h5read.chunked(h5, name, index, ncol)
 }
 \description{
 the API only reads data from H5 by chunks (entire columns)

@@ -4,7 +4,8 @@
 \alias{H5write.blocks}
 \title{Create the H5 file from matrix}
 \usage{
-H5write.blocks(mat, h5file, nGenes, nCells, compress = c("lz4", "gzip"))
+H5write.blocks(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", "none"),
+  nLevel = NULL)
 }
 \description{
 Create the H5 file from matrix
