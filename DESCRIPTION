@@ -1,0 +1,14 @@
+Package: singleCell
+Type: Package
+Title: infrastructure and API for single cell assay
+Version: 1.0.0
+Date: 2016-03-10
+Author: Mike Jiang
+Maintainer: Mike Jiang <wjiang2@fhcrc.org>
+Description: This package provides the infrastructures and APIs to store and access the large single cell assay data efficiently
+License: Artistic-2.0
+LazyLoad: yes
+Imports: Matrix
+biocViews: singlecell, DataImport, Preprocessing, DataRepresentation
+LinkingTo: Rcpp, BH(>= 1.60.0-1), Rhdf5lib
+RoxygenNote: 6.0.1

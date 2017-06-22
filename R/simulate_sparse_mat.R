@@ -1,3 +1,6 @@
+#' simulate single cell data as the sparse matrix
+#' This is the slow version is deprecated by simulate_sparse_mat_fast
+#' @export
 simulate_sparse_mat <- function(alpha, beta, nCells){
   
   pi_g <- rbeta(n = nGenes, alpha, beta)
@@ -23,8 +26,7 @@ simulate_sparse_mat <- function(alpha, beta, nCells){
   m
 }
 
-# more efficient version (gene x cells)
-simulate_sparse_mat_fast_old <- function(alpha, beta, nCells){
+simulate_sparse_mat_v1 <- function(alpha, beta, nCells){
   
   pi_g <- rbeta(n = nGenes, alpha, beta)
   
@@ -69,7 +71,7 @@ simulate_sparse_mat_fast_old <- function(alpha, beta, nCells){
 }
 
 # more efficient version (cells x gene)
-simulate_sparse_mat_fast <- function(alpha, beta, nCells){
+simulate_sparse_mat_v2 <- function(alpha, beta, nCells){
   
   pi_g <- rbeta(n = nGenes, alpha, beta)
   
@@ -113,8 +115,11 @@ simulate_sparse_mat_fast <- function(alpha, beta, nCells){
   sparseMatrix(i = j, p = p, x = x, index1 = F, dims = c(nCells, nGenes))
 }
 
-#preallocate
-simulate_sparse_mat_fast2 <- function(alpha, beta, nCells, cpp = FALSE){
+
+#' more efficient version (gene x cells) by preallocating vector
+#' @import Matrix
+#' @export
+simulate_sparse_mat_v3 <- function(alpha, beta, nCells, cpp = FALSE){
   
   pi_g <- rbeta(n = nGenes, alpha, beta)
    

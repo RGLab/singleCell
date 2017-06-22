@@ -1,3 +1,6 @@
+#' Create sqlite db from matrix
+#' Each column is stored as binary blobs and indexed by column id
+#' @export
 writeDB.blobs <- function(mat, dbfile, nGenes, compress = c("lz4", "gzip")){
   compress <- match.arg(compress)
   
@@ -35,7 +38,8 @@ writeDB.blobs <- function(mat, dbfile, nGenes, compress = c("lz4", "gzip")){
   db_sqlite
 }
 
-#The API only reads data from H5 by chunks (entire columns)
+#' The API only reads data from db by chunks (entire columns)
+#' @export
 readDB.blobs <- function(db, rindx = NULL, cindx = NULL, compress = c("lz4", "gzip")){
   compress <- match.arg(compress)
   sql <- paste0("select chunk from data")
