@@ -13,3 +13,19 @@ h5read1 <- function(filename, ds_name, colIndx) {
     .Call('singleCell_h5read1', PACKAGE = 'singleCell', filename, ds_name, colIndx)
 }
 
+lmdb_open <- function(dbfile) {
+    .Call('singleCell_lmdb_open', PACKAGE = 'singleCell', dbfile)
+}
+
+lmdb_close <- function(db) {
+    invisible(.Call('singleCell_lmdb_close', PACKAGE = 'singleCell', db))
+}
+
+mdb_insert_cols <- function(db, cidx, vecs) {
+    invisible(.Call('singleCell_mdb_insert_cols', PACKAGE = 'singleCell', db, cidx, vecs))
+}
+
+mdb_get_cols <- function(db, cidx) {
+    .Call('singleCell_mdb_get_cols', PACKAGE = 'singleCell', db, cidx)
+}
+

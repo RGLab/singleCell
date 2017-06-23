@@ -48,3 +48,48 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// lmdb_open
+List lmdb_open(std::string dbfile);
+RcppExport SEXP singleCell_lmdb_open(SEXP dbfileSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbfile(dbfileSEXP);
+    rcpp_result_gen = Rcpp::wrap(lmdb_open(dbfile));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lmdb_close
+void lmdb_close(List db);
+RcppExport SEXP singleCell_lmdb_close(SEXP dbSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type db(dbSEXP);
+    lmdb_close(db);
+    return R_NilValue;
+END_RCPP
+}
+// mdb_insert_cols
+void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs);
+RcppExport SEXP singleCell_mdb_insert_cols(SEXP dbSEXP, SEXP cidxSEXP, SEXP vecsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type db(dbSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type cidx(cidxSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type vecs(vecsSEXP);
+    mdb_insert_cols(db, cidx, vecs);
+    return R_NilValue;
+END_RCPP
+}
+// mdb_get_cols
+List mdb_get_cols(List db, IntegerVector cidx);
+RcppExport SEXP singleCell_mdb_get_cols(SEXP dbSEXP, SEXP cidxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type db(dbSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type cidx(cidxSEXP);
+    rcpp_result_gen = Rcpp::wrap(mdb_get_cols(db, cidx));
+    return rcpp_result_gen;
+END_RCPP
+}

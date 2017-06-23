@@ -1,4 +1,5 @@
 RHDF5_LIBS=`echo 'Rhdf5lib::pkgconfig("PKG_C_LIBS")'|\
     "${R_HOME}/bin/R" --vanilla --slave`
-PKG_LIBS=$(RHDF5_LIBS)
+PKG_LIBS=$(RHDF5_LIBS) /home/wjiang2/mylib/lib/liblmdb.so -pthread
 
+PKG_CPPFLAGS=-I"/home/wjiang2/mylib/include"
