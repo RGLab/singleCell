@@ -2,28 +2,36 @@
 #include <lmdb.h>
 using namespace Rcpp;
 using namespace std;
+#define E(expr) CHECK((rc = (expr)) == MDB_SUCCESS, #expr)
+#define RES(err, expr) ((rc = expr) == (err) || (CHECK(!rc, #expr), 0))
+#define CHECK(test, msg) ((test) ? (void)0 : ((void)fprintf(stderr, \
+"%s:%d: %s: %s\n", __FILE__, __LINE__, msg, mdb_strerror(rc)), abort()))
 
 // [[Rcpp::export]]
 List lmdb_open(std::string dbfile)
 {
   int rc;
   MDB_env *env;
-  MDB_dbi *dbi;
   MDB_txn *txn;
-  rc = mdb_env_create(&env);
+  E(mdb_env_create(&env));
+  // E(mdb_env_set_maxreaders(env, 1));
+  // E(mdb_env_set_mapsize(env, 10485760));
+  // 
+  rc = mdb_env_open(env, dbfile.c_str(), 0, 0664);
   if(rc)
-    stop("Can't create mdb env!Error code: ", rc);
-  
-  rc = mdb_env_open(env, dbfile.c_str(), 0, 0666);
-  if(rc)
-    stop("Can't create open db file!Error code: ", rc);
+    stop("Can't create open db file! ", mdb_strerror(rc));
   
   rc = mdb_txn_begin(env, NULL, 0, &txn);
   if(rc)
-    stop("Can't begin transaction!Error code: ", rc);
+    stop("Can't begin transaction!", mdb_strerror(rc));
+  
+  MDB_dbi *dbi = new MDB_dbi;
   rc = mdb_dbi_open(txn, NULL, 0, dbi);
-  if(rc)
-    stop("Can't create open the default database!Error code: ", rc);
+  if(rc){
+    delete dbi;
+    stop("Can't create open the default database! ", mdb_strerror(rc));
+  }
+    
   
   return List::create(Named("env", XPtr<MDB_env>(env))
                      , Named("dbi", XPtr<MDB_dbi>(dbi))
@@ -39,7 +47,10 @@ void lmdb_close(List db){
   MDB_env * env = _env.get();
   MDB_dbi * dbi = _dbi.get();
   mdb_dbi_close(env, *dbi);
+  delete dbi;
+  dbi = NULL;
   mdb_env_close(env);
+  env = NULL;
 }
 
 // [[Rcpp::export]]
@@ -53,7 +64,8 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
   MDB_env * env = _env.get();
   MDB_dbi * dbi = _dbi.get();
   MDB_txn * txn = _txn.get();
-  
+  if(!env||!dbi||!txn)
+    stop("Not valid db connection!");
   
   MDB_val key, data;
   key.mv_size = sizeof(int);
@@ -66,15 +78,12 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
     NumericVector val = vecs[i];
     data.mv_size = val.size() * sizeof(double);
     data.mv_data = &val[0];
-    rc = mdb_put(txn, *dbi, &key, &data, 0);  
+    E(mdb_put(txn, *dbi, &key, &data, 0));  
   }
   
   
-  rc = mdb_txn_commit(txn);
-  if (rc) {
-    stop("mdb_txn_commit: ", mdb_strerror(rc));
-    
-  }
+  E(mdb_txn_commit(txn));
+  
   
   
 }
@@ -96,14 +105,17 @@ List mdb_get_cols(List db, IntegerVector cidx) {
   //init key and data obj
   key.mv_size = sizeof(int);
   
-  rc = mdb_txn_begin(env, NULL, MDB_RDONLY, &txn);
-  rc = mdb_cursor_open(txn, *dbi, &cursor);
+  E(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
+  E(mdb_cursor_open(txn, *dbi, &cursor));
+  
   char * bytes;
-  List res(cidx);
-  for(int i = 0; i < cidx.size(); i++)
+  int ncol = cidx.size();
+  List res(ncol);
+  for(int i = 0; i < ncol; i++)
   {
     key.mv_data = &cidx[i];
-    mdb_cursor_get(cursor, &key, &data, MDB_SET);
+    E(mdb_cursor_get(cursor, &key, &data, MDB_SET));
+  
     //cp buffer
     int cnt = data.mv_size;
     bytes = new char[cnt];
@@ -116,6 +128,7 @@ List mdb_get_cols(List db, IntegerVector cidx) {
   }
   mdb_cursor_close(cursor);
   mdb_txn_abort(txn);
+  
   
   return res;
   

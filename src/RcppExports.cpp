@@ -93,3 +93,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"singleCell_h5createDataset1", (DL_FUNC) &singleCell_h5createDataset1, 7},
+    {"singleCell_h5write1", (DL_FUNC) &singleCell_h5write1, 4},
+    {"singleCell_h5read1", (DL_FUNC) &singleCell_h5read1, 3},
+    {"singleCell_lmdb_open", (DL_FUNC) &singleCell_lmdb_open, 1},
+    {"singleCell_lmdb_close", (DL_FUNC) &singleCell_lmdb_close, 1},
+    {"singleCell_mdb_insert_cols", (DL_FUNC) &singleCell_mdb_insert_cols, 3},
+    {"singleCell_mdb_get_cols", (DL_FUNC) &singleCell_mdb_get_cols, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_singleCell(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

@@ -1,3 +1,4 @@
+#' @import Rcpp
 #' @useDynLib singleCell
 NULL
 
