@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include <lmdb.h>
+#include "lmdb.h"
 using namespace Rcpp;
 using namespace std;
 #define E(expr) CHECK((rc = (expr)) == MDB_SUCCESS, #expr)
