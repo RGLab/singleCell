@@ -77,7 +77,7 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
   check_rc(rc);
   
   MDB_dbi dbi;
-  rc = mdb_dbi_open(txn, NULL, 0, &dbi);
+  rc = mdb_dbi_open(txn, NULL, MDB_INTEGERKEY, &dbi);
   check_rc(rc);
   
   MDB_val key, data;
@@ -104,7 +104,7 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
     //write to db
     data.mv_size = nCompressed + offset;
     data.mv_data = dest;
-    rc = mdb_put(txn, dbi, &key, &data, 0);  
+    rc = mdb_put(txn, dbi, &key, &data, MDB_APPEND);  //MDB_APPEND flag allows faster write assuming key is in correct order
     check_rc(rc);
   }
   

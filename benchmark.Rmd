@@ -62,12 +62,13 @@ if(!file.exists(benchmarkfile))
                                   , size = size
                                   , slicing = c("row", "col", "row&col")
                                   , time = timing)
-                browser()
+                
                 #lmdb
                 dbfile <- file.path(path, paste0(suffix,".mdb"))
                 if(!dir.exists(dbfile))
                   writelmdb.blobs(mat, dbfile, nGenes)
                 size <- file.size(file.path(dbfile, "data.mdb")) /1e9
+                browser()
                 timing <- microbenchmark(dd <- readlmdb.blobs(dbfile, rindx = ridx, cindx = NULL, nGenes)
                                          ,dd <-  readlmdb.blobs(dbfile, rindx = NULL, cindx = cidx, nGenes)
                                          , sub2 <- readlmdb.blobs(dbfile, rindx = ridx, cindx = cidx, nGenes)
