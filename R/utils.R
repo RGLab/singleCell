@@ -2,7 +2,7 @@
 split.block <- function(x){
   #determine block size
   nBlockSize <- min(1000, x)
-  nBlocks <- ceiling(x/nBlockSize)
+  nBlocks <- ceiling(length(x)/nBlockSize)
   if(nBlocks > 1)
     blocks <- cut(seq_len(x), nBlocks)
   else

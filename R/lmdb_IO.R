@@ -20,7 +20,7 @@ writelmdb.blobs <- function(mat, dbfile, nGenes, compress = c("lz4", "gzip", "no
 #' The API only reads data from db by chunks (entire columns)
 #' @importFrom data.table frank
 #' @export
-readlmdb.blobs <- function(dbfile, rindx = NULL, cindx = NULL, compress = c("lz4", "gzip")){
+readlmdb.blobs <- function(dbfile, rindx = NULL, cindx = NULL, nGenes, compress = c("lz4", "gzip")){
   compress <- match.arg(compress)
   db <- lmdb_open(dbfile)  
   if(is.null(cindx))

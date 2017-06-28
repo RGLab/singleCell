@@ -28,8 +28,8 @@ path <- file.path(path, "benchmark")
 nGenes <- 3e4
 nSampleSize <- 1e3
 set.seed(4)
-nCellsVec <- c(3e2, 1e3, 4e3, 7e3, 2e4, 5e4,1e5,5e5)[2:6]
-beta_values <- data.frame(alpha = c(0.1, 0.2, 0.3, 0.4), beta = c(0.8, 0.9, 0.7, 0.6))
+nCellsVec <- c(3e2, 1e3, 4e3, 7e3, 2e4, 5e4,1e5,5e5)[2:3]
+beta_values <- data.frame(alpha = c(0.1, 0.2, 0.3, 0.4), beta = c(0.8, 0.9, 0.7, 0.6))[1:2,]
 cidx <- sample(nGenes, nSampleSize)
 ntime <- 10
 # Rprof()
@@ -62,8 +62,23 @@ if(!file.exists(benchmarkfile))
                                   , size = size
                                   , slicing = c("row", "col", "row&col")
                                   , time = timing)
-                # browser()
-              
+                browser()
+                #lmdb
+                dbfile <- file.path(path, paste0(suffix,".mdb"))
+                if(!dir.exists(dbfile))
+                  writelmdb.blobs(mat, dbfile, nGenes)
+                size <- file.size(file.path(dbfile, "data.mdb")) /1e9
+                timing <- microbenchmark(dd <- readlmdb.blobs(dbfile, rindx = ridx, cindx = NULL, nGenes)
+                                         ,dd <-  readlmdb.blobs(dbfile, rindx = NULL, cindx = cidx, nGenes)
+                                         , sub2 <- readlmdb.blobs(dbfile, rindx = ridx, cindx = cidx, nGenes)
+                                         , times = ntime, unit = "ms")
+                
+                timing <- summary(timing)[["mean"]]
+                dt5 <- data.table(nCells = nCells
+                                  , format = "lmdb(lz4)"
+                                  , size = size
+                                  , slicing = c("row", "col", "row&col")
+                                  , time = timing)
                 
                 #sqlite(lz4)
                 # compress <- "lz4"
