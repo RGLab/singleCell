@@ -23,24 +23,24 @@ List lmdb_open(std::string dbfile)
   if(rc)
     stop("Can't create open db file! ", mdb_strerror(rc));
   
-  rc = mdb_txn_begin(env, NULL, 0, &txn);
-  if(rc)
-    stop("Can't begin transaction!", mdb_strerror(rc));
-  
-  MDB_dbi dbi;
-  rc = mdb_dbi_open(txn, NULL, 0, &dbi);
+  // rc = mdb_txn_begin(env, NULL, 0, &txn);
+  // if(rc)
+  //   stop("Can't begin transaction!", mdb_strerror(rc));
+  // 
+  // MDB_dbi dbi;
+  // rc = mdb_dbi_open(txn, NULL, 0, &dbi);
   if(rc){
     
-    mdb_txn_abort(txn);
+    // mdb_txn_abort(txn);
     mdb_env_close(env);
     
     stop("Can't create open the default database! ", mdb_strerror(rc));
   }
-    
+  // mdb_txn_abort(txn);  
   
   return List::create(Named("env", XPtr<MDB_env>(env, false))//we don't own the pointer so disable the default gc from R
-                     , Named("dbi", dbi)
-                      , Named("txn", XPtr<MDB_txn>(txn, false))
+                     // , Named("dbi", dbi)
+                      // , Named("txn", XPtr<MDB_txn>(txn, false))
                       );
 }
 
@@ -48,16 +48,16 @@ List lmdb_open(std::string dbfile)
 void lmdb_close(List db){
   
   XPtr<MDB_env> _env(as<XPtr<MDB_env> >(db["env"]));
-  XPtr<MDB_txn > _txn(as<XPtr<MDB_txn> >(db["txn"]));
+  // XPtr<MDB_txn > _txn(as<XPtr<MDB_txn> >(db["txn"]));
   
   MDB_env * env = _env.get();
-  MDB_txn * txn = _txn.get();
-  MDB_dbi dbi(as<MDB_dbi>(db["dbi"]));
+  // MDB_txn * txn = _txn.get();
+  // MDB_dbi dbi(as<MDB_dbi>(db["dbi"]));
   
   //TODO: deal with the situation when txn has not been commited or abort
   // mdb_txn_abort(txn);
   // txn = NULL;
-  mdb_dbi_close(env, dbi);
+  // mdb_dbi_close(env, dbi);
   
   mdb_env_close(env);
   env = NULL;
@@ -69,13 +69,17 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
   int rc;
 
   XPtr<MDB_env> _env(as<XPtr<MDB_env> >(db["env"]));
-  XPtr<MDB_txn > _txn(as<XPtr<MDB_txn> >(db["txn"]));
+  // XPtr<MDB_txn > _txn(as<XPtr<MDB_txn> >(db["txn"]));
   MDB_env * env = _env.get();
-  MDB_dbi dbi(as<MDB_dbi>(db["dbi"]));
-  MDB_txn * txn = _txn.get();
-  if(!env||!dbi||!txn)
+  // MDB_dbi dbi(as<MDB_dbi>(db["dbi"]));
+  // MDB_txn * txn = _txn.get();
+  if(!env)
     stop("Not valid db connection!");
+  MDB_txn * txn;
+  E(mdb_txn_begin(env, NULL, 0, &txn));
   
+  MDB_dbi dbi;
+  E(mdb_dbi_open(txn, NULL, 0, &dbi));
   
   
   MDB_val key, data;
@@ -107,7 +111,7 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
   
   
   E(mdb_txn_commit(txn));
-  
+  mdb_dbi_close(env, dbi);
   
   
 }
@@ -116,10 +120,10 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
 List mdb_get_cols(List db, IntegerVector cidx) {
   int rc;
   XPtr<MDB_env> _env(as<XPtr<MDB_env> >(db["env"]));
-  XPtr<MDB_txn > _txn(as<XPtr<MDB_txn> >(db["txn"]));
+  // XPtr<MDB_txn > _txn(as<XPtr<MDB_txn> >(db["txn"]));
   MDB_env * env = _env.get();
-  MDB_dbi dbi(as<MDB_dbi>(db["dbi"]));
-  MDB_txn * txn = _txn.get();
+  // MDB_dbi dbi(as<MDB_dbi>(db["dbi"]));
+  // MDB_txn * txn = _txn.get();
   
   MDB_val key, data;
  
@@ -127,8 +131,9 @@ List mdb_get_cols(List db, IntegerVector cidx) {
   
   //init key and data obj
   key.mv_size = sizeof(int);
-  
+  MDB_txn * txn;
   E(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
+  MDB_dbi dbi;
   E(mdb_cursor_open(txn, dbi, &cursor));
   
   char * buffer;
@@ -172,7 +177,7 @@ List mdb_get_cols(List db, IntegerVector cidx) {
   
   mdb_cursor_close(cursor);
   mdb_txn_abort(txn);
-  
+  mdb_dbi_close(env, dbi);
   
   return res;
   
