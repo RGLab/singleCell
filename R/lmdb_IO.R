@@ -6,7 +6,7 @@ writelmdb.blobs <- function(mat, dbfile, nGenes, compress = c("lz4", "gzip", "no
   if(!dir.exists(dbfile))
     dir.create(dbfile)
   
-  db <- mdb_open(dbfile)  
+  db <- lmdb_open(dbfile)  
   #determine block size
   nBlockSize <- min(1000, nGenes)
   nBlocks <- nGenes/nBlockSize
@@ -22,14 +22,15 @@ writelmdb.blobs <- function(mat, dbfile, nGenes, compress = c("lz4", "gzip", "no
     
     mdb_insert_cols(db, i, vecs)   
   }
-  mdb_close(db)
+  lmdb_close(db)
 }
 
 #' The API only reads data from db by chunks (entire columns)
+#' @importFrom data.table frank
 #' @export
 readlmdb.blobs <- function(dbfile, rindx = NULL, cindx = NULL, compress = c("lz4", "gzip")){
   compress <- match.arg(compress)
-  db <- mdb_open(dbfile)  
+  db <- lmdb_open(dbfile)  
   if(is.null(cindx))
   {
     cindx <- seq_len(nGenes)
@@ -58,9 +59,10 @@ readlmdb.blobs <- function(dbfile, rindx = NULL, cindx = NULL, compress = c("lz4
     do.call(cbind,cols)
   })
   # browser()
+  lmdb_close(db)
   do.call(cbind,res)[,orig.order]
   
-  mdb_close(db)
+  
   
   
   
