@@ -4,43 +4,40 @@
 #include "lz4.h"
 using namespace Rcpp;
 using namespace std;
-#define E(expr) CHECK((rc = (expr)) == MDB_SUCCESS, #expr)
-#define RES(err, expr) ((rc = expr) == (err) || (CHECK(!rc, #expr), 0))
-#define CHECK(test, msg) ((test) ? (void)0 : ((void)fprintf(stderr, \
-"%s:%d: %s: %s\n", __FILE__, __LINE__, msg, mdb_strerror(rc)), abort()))
-
+// #define E(expr) CHECK((rc = (expr)) == MDB_SUCCESS, #expr)
+// #define RES(err, expr) ((rc = expr) == (err) || (CHECK(!rc, #expr), 0))
+// #define CHECK(test, msg) ((test) ? (void)0 : ((void)fprintf(stderr, \
+// "%s:%d: %s: %s\n", __FILE__, __LINE__, msg, mdb_strerror(rc)), stop()))
+void check_rc(int rc)
+{
+  if(rc != MDB_SUCCESS)
+  {
+    stop(mdb_strerror(rc));
+  }
+}
 // [[Rcpp::export]]
 List lmdb_open(std::string dbfile)
 {
   int rc;
   MDB_env *env;
   MDB_txn *txn;
-  E(mdb_env_create(&env));
+  rc = mdb_env_create(&env);
+  check_rc(rc);
   // E(mdb_env_set_maxreaders(env, 1));
-  E(mdb_env_set_mapsize(env, 4096*1e7));//max 38G
-  // 
-  rc = mdb_env_open(env, dbfile.c_str(), 0, 0664);
-  if(rc)
-    stop("Can't create open db file! ", mdb_strerror(rc));
+  rc = mdb_env_set_mapsize(env, 4096*1e7);//max 38G
+  check_rc(rc);
   
-  // rc = mdb_txn_begin(env, NULL, 0, &txn);
-  // if(rc)
-  //   stop("Can't begin transaction!", mdb_strerror(rc));
-  // 
-  // MDB_dbi dbi;
-  // rc = mdb_dbi_open(txn, NULL, 0, &dbi);
+  rc = mdb_env_open(env, dbfile.c_str(), 0, 0664);
+  
   if(rc){
     
-    // mdb_txn_abort(txn);
     mdb_env_close(env);
     
-    stop("Can't create open the default database! ", mdb_strerror(rc));
+    check_rc(rc);
   }
-  // mdb_txn_abort(txn);  
+  
   
   return List::create(Named("env", XPtr<MDB_env>(env, false))//we don't own the pointer so disable the default gc from R
-                     // , Named("dbi", dbi)
-                      // , Named("txn", XPtr<MDB_txn>(txn, false))
                       );
 }
 
@@ -76,11 +73,12 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
   if(!env)
     stop("Not valid db connection!");
   MDB_txn * txn;
-  E(mdb_txn_begin(env, NULL, 0, &txn));
+  rc = mdb_txn_begin(env, NULL, 0, &txn);
+  check_rc(rc);
   
   MDB_dbi dbi;
-  E(mdb_dbi_open(txn, NULL, 0, &dbi));
-  
+  rc = mdb_dbi_open(txn, NULL, 0, &dbi);
+  check_rc(rc);
   
   MDB_val key, data;
   key.mv_size = sizeof(int);
@@ -106,11 +104,13 @@ void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs)
     //write to db
     data.mv_size = nCompressed + offset;
     data.mv_data = dest;
-    E(mdb_put(txn, dbi, &key, &data, 0));  
+    rc = mdb_put(txn, dbi, &key, &data, 0);  
+    check_rc(rc);
   }
   
   
-  E(mdb_txn_commit(txn));
+  rc = mdb_txn_commit(txn);
+  check_rc(rc);
   mdb_dbi_close(env, dbi);
   
   
@@ -131,10 +131,17 @@ List mdb_get_cols(List db, IntegerVector cidx) {
   
   //init key and data obj
   key.mv_size = sizeof(int);
+  
   MDB_txn * txn;
-  E(mdb_txn_begin(env, NULL, MDB_RDONLY, &txn));
+  rc = mdb_txn_begin(env, NULL, MDB_RDONLY, &txn);
+  check_rc(rc);
+  
   MDB_dbi dbi;
-  E(mdb_cursor_open(txn, dbi, &cursor));
+  rc = mdb_dbi_open(txn, NULL, 0, &dbi);
+  check_rc(rc);
+  
+  rc = mdb_cursor_open(txn, dbi, &cursor);
+  check_rc(rc);
   
   char * buffer;
   int ncol = cidx.size();
@@ -143,8 +150,8 @@ List mdb_get_cols(List db, IntegerVector cidx) {
   for(int i = 0; i < ncol; i++)
   {
     key.mv_data = &cidx[i];
-    E(mdb_cursor_get(cursor, &key, &data, MDB_SET));
-  
+    rc = mdb_cursor_get(cursor, &key, &data, MDB_SET);
+    check_rc(rc);
     //get nUncompressed
     int nUncompressed, nCompressed;
     memcpy((char *)&nUncompressed, data.mv_data, sizeof(int));
