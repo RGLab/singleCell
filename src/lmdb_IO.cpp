@@ -17,7 +17,7 @@ List lmdb_open(std::string dbfile)
   MDB_txn *txn;
   E(mdb_env_create(&env));
   // E(mdb_env_set_maxreaders(env, 1));
-  // E(mdb_env_set_mapsize(env, 10485760));
+  E(mdb_env_set_mapsize(env, 4096*1e7));//max 38G
   // 
   rc = mdb_env_open(env, dbfile.c_str(), 0, 0664);
   if(rc)

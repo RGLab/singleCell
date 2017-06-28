@@ -10,14 +10,8 @@ h5read.chunked <- function(h5, name, index, ncol){
   cind <- index[[2]]
   if(is.null(cind))
     cind <- seq_len(ncol)
-  nTotal <- length(cind)
-  nBlockSize <- min(1000, nTotal)
-  nBlocks <- nTotal/nBlockSize
-  if(nBlocks > 1)
-    blocks <- cut(cind, nBlocks)
-  else
-    blocks <- 1
-  col.grps <- split(cind, blocks)
+  
+  col.grps <- split.block(cind)
   res <- lapply(col.grps, function(i){
     sub <- h5read1(h5, name, i)
     # browser()
@@ -44,15 +38,7 @@ H5write.blocks <- function(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", 
                    , chunk_dims = rev(c(nrow, 1))#note that H5 dims start with col
                    , compressor = match(compress, c("lz4", "gzip", "none"))
                    , nLevel = nLevel)
-  #determine block size
-  nBlockSize <- min(1000, ncol)
-  nBlocks <- ncol/nBlockSize
-  if(nBlocks > 1)
-    blocks <- cut(seq_len(ncol), nBlocks)
-  else
-    blocks <- 1
-  
-  grps <- split(seq_len(ncol), blocks)
+  grps <- split.block(ncol)
   #write subset of columns (avoid coerce entire mat into memory)
   for(i in grps)
     h5write1(as.matrix(mat[,i, drop = F]), h5file, "data", colIndx = i)
