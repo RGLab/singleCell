@@ -7,7 +7,7 @@ writelmdb.blobs <- function(mat, dbfile, nGenes, compress = c("lz4", "gzip", "no
     dir.create(dbfile)
   
   db <- lmdb_open(dbfile)  
-  grps <- split.block(nGenes)
+  grps <- split.block(seq_len(nGenes))
   for(i in grps)
   {
      vecs <- lapply(i, function(j)mat[, j])
@@ -36,7 +36,7 @@ readlmdb.blobs <- function(dbfile, rindx = NULL, cindx = NULL, nGenes, compress 
   res <- lapply(col.grps, function(i){
     # browser()
     #fetch blobs
-    cols <- mdb_get_cols(db, cindx)
+    cols <- mdb_get_cols(db, i)
     
     if(!is.null(rindx))
       cols <- lapply(cols, function(x)x[rindx])
