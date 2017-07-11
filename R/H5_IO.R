@@ -5,15 +5,18 @@ NULL
 #' the API only reads data from H5 by chunks (entire columns)
 #' @importFrom rhdf5 h5read
 #' @export
-h5read.chunked <- function(h5, name, index, ncol, ...){
+h5read.chunked <- function(h5, name, index, ncol, verbose = FALSE, ...){
   rind <- index[[1]]
   cind <- index[[2]]
   if(is.null(cind))
     cind <- seq_len(ncol)
   
-  col.grps <- split.block(cind, ...)
-  res <- lapply(col.grps, function(i){
-    sub <- h5read1(h5, name, i)
+  grps <- split.block(cind, ...)
+  res <- lapply(seq_along(grps), function(i){
+    if(verbose)
+      message("reading group:", i, " out of ", length(grps))
+    j <- grps[[i]]
+    sub <- h5read1(h5, name, j)
     # browser()
     if(!is.null(rind))
       sub <- sub[rind, ]
@@ -27,7 +30,7 @@ h5read.chunked <- function(h5, name, index, ncol, ...){
 #' 
 #' @importFrom rhdf5 h5createFile
 #' @export
-H5write.blocks <- function(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", "none"), nLevel = NULL, ...){
+H5write.blocks <- function(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", "none"), nLevel = NULL, verbose = FALSE, ...){
   compress <- match.arg(compress)
   if(file.exists(h5file))
     file.remove(h5file)
@@ -42,7 +45,13 @@ H5write.blocks <- function(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", 
                    , nLevel = nLevel)
   grps <- split.block(seq_len(ncol), ...)
   #write subset of columns (avoid coerce entire mat into memory)
-  for(i in grps)
-    h5write1(as.matrix(mat[,i, drop = F]), h5file, "data", colIndx = i)
+  for(i in seq_along(grps))
+  {
+    if(verbose)
+      cat("writing group:", i, " out of ", length(grps), "\n")
+    j <- grps[[i]]
+    h5write1(as.matrix(mat[,j, drop = F]), h5file, "data", colIndx = j)
+  }
+    
   
 }
