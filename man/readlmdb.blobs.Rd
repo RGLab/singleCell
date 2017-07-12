@@ -4,8 +4,8 @@
 \alias{readlmdb.blobs}
 \title{The API only reads data from db by chunks (entire columns)}
 \usage{
-readlmdb.blobs(dbfile, rindx = NULL, cindx = NULL, compress = c("lz4",
-  "gzip"))
+readlmdb.blobs(dbfile, rindx = NULL, cindx = NULL, nGenes,
+  compress = c("lz4", "gzip"))
 }
 \description{
 The API only reads data from db by chunks (entire columns)

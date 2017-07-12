@@ -5,7 +5,10 @@
 \title{Create the H5 file from matrix}
 \usage{
 H5write.blocks(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", "none"),
-  nLevel = NULL)
+  nLevel = NULL, verbose = FALSE, ...)
+}
+\arguments{
+\item{mat}{the object that is coercible to matrix through 'as.matrix' method}
 }
 \description{
 Create the H5 file from matrix
