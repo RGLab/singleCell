@@ -2,17 +2,45 @@
 #' @useDynLib singleCell
 NULL
 
+#' @export
+h5read.chunked <- function(x, ...) UseMethod("h5read.chunked")
+
+#' @export
+h5read.chunked.singleCell <- function(x, name, index, ...){
+  # file_by_gene <- x@file_by_gene
+  #dispatch to file based on the dimension requested
+  gind <- index[[1]]
+  cind <- index[[2]]
+  ncell <- x@nCells
+  ngene <- x@nGenes
+  if(is.null(cind))
+    cind <- seq_len(ncell)
+  if(is.null(gind))
+    gind <- seq_len(ngene)
+  if(length(gind) /length(cind) > ngene/ncell)
+  {
+    h5read.chunked(x@file_by_cell, name, index, ncell, ...)
+  }else
+  {
+    res <- h5read.chunked(x@file_by_gene, name, rev(index), ngene, ...)
+    t(res)
+  }
+    
+} 
+
 #' the API only reads data from H5 by chunks (entire columns)
 #' @importFrom rhdf5 h5read
 #' @export
-h5read.chunked <- function(h5, name, index, ncol, verbose = FALSE, ...){
+h5read.chunked.character <- function(x, name, index, ncol, verbose = FALSE, mc.cores = 1, ...){
+  require(parallel)
+  h5 <- x
   rind <- index[[1]]
   cind <- index[[2]]
   if(is.null(cind))
     cind <- seq_len(ncol)
   
   grps <- split.block(cind, ...)
-  res <- lapply(seq_along(grps), function(i){
+  res <- mclapply(seq_along(grps), function(i){
     if(verbose)
       message("reading group:", i, " out of ", length(grps))
     j <- grps[[i]]
@@ -21,7 +49,7 @@ h5read.chunked <- function(h5, name, index, ncol, verbose = FALSE, ...){
     if(!is.null(rind))
       sub <- sub[rind,, drop = FALSE ]
     sub
-  })
+  }, mc.cores = mc.cores)
   do.call(cbind,res)
 }
 
@@ -61,7 +89,7 @@ H5write.blocks <- function(mat, h5file, ncol, nrow, compress = c("lz4", "gzip", 
 #' @param dest the H5 file name to be written to
 #' @export
 #' @importFrom rhdf5 H5Fopen H5Dopen H5Dget_space H5Sget_simple_extent_dims H5close
-H5transpose <- function(src, dest, compress = c("lz4", "gzip", "none"), nLevel = NULL, verbose = FALSE, ...){
+H5transpose <- function(src, dest, col.ind = NULL, compress = c("lz4", "gzip", "none"), nLevel = NULL, verbose = FALSE, ...){
   
   fid <- H5Fopen(src)
   ds <- H5Dopen(fid, "data")
@@ -72,6 +100,10 @@ H5transpose <- function(src, dest, compress = c("lz4", "gzip", "none"), nLevel =
   dims <- rev(dims) #transpose it
   ncol <- dims[2] 
   nrow <- dims[1]
+  if(is.null(col.ind))
+    nrow.new <- nrow
+  else
+    nrow.new <- length(col.ind)
   compress <- match.arg(compress)
   if(file.exists(dest))
     file.remove(dest)
@@ -80,10 +112,12 @@ H5transpose <- function(src, dest, compress = c("lz4", "gzip", "none"), nLevel =
   if(is.null(nLevel))
     nLevel <- ifelse(compress == "lz4", -1, 6)
   
-  h5createDataset1(dest, "data", rev(c(nrow, ncol)), storage_mode = "double"
-                   , chunk_dims = rev(c(nrow, 1))#note that H5 dims start with col
+  h5createDataset1(dest, "data", rev(c(nrow.new, ncol)), storage_mode = "double"
+                   , chunk_dims = rev(c(nrow.new, 1))#note that H5 dims start with col
                    , compressor = match(compress, c("lz4", "gzip", "none"))
                    , nLevel = nLevel)
+  
+  
   grps <- split.block(seq_len(ncol), ...)
   #write subset of columns (avoid coerce entire mat into memory)
   for(i in seq_along(grps))
@@ -95,7 +129,7 @@ H5transpose <- function(src, dest, compress = c("lz4", "gzip", "none"), nLevel =
     #read rows from src
     if(verbose)
       cat("reading the source..")
-    mat <- h5read.chunked(src, "data", list(j, NULL), nrow, ...)
+    mat <- h5read.chunked(src, "data", list(j, col.ind), nrow, ...)
     #write them as cols to dest
     if(verbose)
       cat("writing..\n")

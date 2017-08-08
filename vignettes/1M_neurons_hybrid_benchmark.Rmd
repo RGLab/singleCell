@@ -1,0 +1,165 @@
+---
+title: "benchmark"
+author: "Mike Jiang"
+date: "May 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+```{r, echo=FALSE}
+library(microbenchmark)
+library(Matrix)
+library(data.table)
+# library(RSQLite)
+library(rhdf5)
+library(singleCell)
+library(ggplot2)
+library(TENxGenomics)
+library(HDF5Array)
+Sys.setenv(HDF5_PLUGIN_PATH="/home/wjiang2/mylib/lib")
+path <- "/loc/no-backup/mike/shared"
+path <- file.path(path, "1M_neurons")
+tenxFile <-  file.path(path, "1M_neurons_filtered_gene_bc_matrices_h5.h5")
+# ten <- TENxGenomics(tenxFile)
+# ten <- ten[1:1e3, 1:1e4]
+# dims <- dim(ten)
+
+h5gz_gene <- file.path(path, "gz_chunk_by_gene.h5")
+h5gz_cell <- file.path(path, "gz_chunk_by_cell.h5")
+sc <- singleCell(h5gz_gene, h5gz_cell)
+h5array_cell <- HDF5Array(h5gz_cell, "data")
+h5array_gene <- HDF5Array(h5gz_gene, "data")
+dims <- dim(h5array_gene)
+dims
+nGenes <- dims[2]
+nCells <- dims[1]
+```
+
+
+
+```{r}
+file.size(tenxFile) /1e9
+file.size(h5gz_gene) /1e9
+file.size(h5gz_cell) /1e9
+# file.size(h5uncompress) /1e9
+```
+
+## benchmark different formats
+```{r, echo=FALSE}
+block.size <- 10
+
+set.seed(4)
+idx <- matrix(c(10,10
+                ,10, NA
+                , NA, 100
+                , 10, 1e4
+                , 1e3, 10
+                , 1e3, 1e4
+                  )
+               , ncol =2, byrow = TRUE)[-1,, drop = F]
+
+ntime <- 5
+# Rprof()
+
+benchmarkfile <- file.path(path,paste0("dt_", paste(nGenes, sep = "_"), ".rds"))
+if(!file.exists(benchmarkfile))
+{
+   res <- apply(idx, 1, function(r){
+              nGeneSampleSize <- r[1]
+              nCellSampleSize <- r[2]
+              
+              if(!is.na(nGeneSampleSize))
+                gidx <- sample(nGenes, nGeneSampleSize)
+              else
+              {
+                nGeneSampleSize <- nGenes
+                gidx <- NULL
+              }
+                
+              
+              if(!is.na(nCellSampleSize))
+                cidx <- sample(nCells, nCellSampleSize)
+              else
+              {
+                nCellSampleSize <- nCells
+                cidx <- NULL
+              }
+                
+# browser()
+              compress <- "gzip"
+              #h5array_cell
+              if(!is.null(gidx))
+                h5array_sub <- h5array_cell[gidx,]
+              if(!is.null(cidx))
+                h5array_sub <- h5array_sub[,cidx]
+               timing <- microbenchmark(sub2 <- as.matrix(h5array_sub), times = ntime, unit = "ms")
+               timing <- summary(timing)[["mean"]]
+            
+                dt2 <- data.table(format = paste0("h5array_by_cell (gzip)", compress)
+                                , time = timing)
+            
+                #h5array_gene
+              if(!is.null(gidx))
+                h5array_sub <- h5array_gene[,gidx]
+              if(!is.null(cidx))
+                h5array_sub <- h5array_sub[cidx,]
+               timing <- microbenchmark(sub3 <- as.matrix(h5array_sub), times = ntime, unit = "ms")
+               timing <- summary(timing)[["mean"]]
+            
+                dt3 <- data.table(format = paste0("h5array_by_gene (gzip)", compress)
+                                , time = timing)
+           
+               
+              #chunked.read.h5 gzip
+              timing <- microbenchmark(sub4 <- h5read.chunked(sc, "data", list(gidx, cidx), block.size = block.size)
+                                       , times = ntime, unit = "ms")
+              timing <- summary(timing)[["mean"]]
+              dt4 <- data.table(format = paste0("hybrid (gzip)", compress)
+                                , time = timing)
+              
+              
+             
+               #h5uncompress
+             # h5array <- HDF5Array(h5uncompress, "data")
+             # timing <- microbenchmark(dd <- as.matrix(h5array[ridx, ])
+             #                           ,dd <-  as.matrix(h5array[, cidx])
+             #                           , sub5 <- as.matrix(h5array[ridx, cidx])
+             #                           , times = ntime, unit = "ms")
+             # timing <- summary(timing)[["mean"]]
+             # dt5 <- data.table(format = "h5array (uncompress)"
+             #                    , slicing = c("row", "col", "row&col")
+             #                    , time = timing)  
+              
+               H5close()
+              
+              
+
+              sub3 <- t(sub3)
+              if(!isTRUE(all.equal(sub2, sub4, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub2, sub3, check.attributes = F, tol = 2e-8)))
+                stop("wrong reading!")
+              thisRes <- rbindlist(list(dt2, dt3, dt4))
+               # thisRes <- dt4
+              thisRes[,nGenes := nGeneSampleSize]
+              thisRes[,nCells := nCellSampleSize]
+              thisRes
+             
+            })
+  # Rprof(NULL)
+  # summaryRprof()
+  dt <- rbindlist(res)
+  saveRDS(dt, file = benchmarkfile)
+}else
+  dt <- readRDS(benchmarkfile)
+```
+
+## plot the result
+```{r fig.width=14}
+
+dt[, slicing := paste0("nGene=", nGenes, " nCell=", nCells)]
+ggplot(dt, aes(y = time, x = format, fill = format )) + geom_col(position = "dodge")  + ylab("time (ms)") + scale_y_log10() +facet_wrap(~slicing)
+
+```
+
+
