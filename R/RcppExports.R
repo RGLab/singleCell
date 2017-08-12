@@ -29,3 +29,11 @@ mdb_get_cols <- function(db, cidx) {
     .Call('singleCell_mdb_get_cols', PACKAGE = 'singleCell', db, cidx)
 }
 
+lzcompress <- function(vec, acceleration = 1L, verbose = FALSE) {
+    .Call('singleCell_lzcompress', PACKAGE = 'singleCell', vec, acceleration, verbose)
+}
+
+lzdecompress <- function(input, verbose = FALSE) {
+    .Call('singleCell_lzdecompress', PACKAGE = 'singleCell', input, verbose)
+}
+

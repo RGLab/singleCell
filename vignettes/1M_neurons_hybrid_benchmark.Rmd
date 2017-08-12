@@ -28,7 +28,10 @@ tenxFile <-  file.path(path, "1M_neurons_filtered_gene_bc_matrices_h5.h5")
 
 h5gz_gene <- file.path(path, "gz_chunk_by_gene.h5")
 h5gz_cell <- file.path(path, "gz_chunk_by_cell.h5")
-sc <- singleCell(h5gz_gene, h5gz_cell)
+h5lz_gene <- file.path(path, "lz_chunk_by_gene.h5")
+h5lz_cell <- file.path(path, "lz_chunk_by_cell.h5")
+sc.gz <- singleCell(h5gz_gene, h5gz_cell)
+sc.lz <- singleCell(h5lz_gene, h5lz_cell)
 h5array_cell <- HDF5Array(h5gz_cell, "data")
 h5array_gene <- HDF5Array(h5gz_gene, "data")
 dims <- dim(h5array_gene)
@@ -51,16 +54,24 @@ file.size(h5gz_cell) /1e9
 block.size <- 10
 
 set.seed(4)
-idx <- matrix(c(10,10
-                ,10, NA
-                , NA, 100
-                , 10, 1e4
-                , 1e3, 10
-                , 1e3, 1e4
+idx <- matrix(c( 10,10
+                  ,10 , 1e6
+                 , 30, 1e6
+                 , 50 , 1e6
+                 , 70, 1e6
+                 , 100, 1e6
+                 
+                 
+                , 1e4, 10
+                , 1e4, 50
+                , 1e4, 1e2
+                , 1e4, 1e3
+                , 1e4, 2e3
+                
                   )
                , ncol =2, byrow = TRUE)[-1,, drop = F]
 
-ntime <- 5
+ntime <- 10
 # Rprof()
 
 benchmarkfile <- file.path(path,paste0("dt_", paste(nGenes, sep = "_"), ".rds"))
@@ -90,36 +101,44 @@ if(!file.exists(benchmarkfile))
 # browser()
               compress <- "gzip"
               #h5array_cell
-              if(!is.null(gidx))
-                h5array_sub <- h5array_cell[gidx,]
-              if(!is.null(cidx))
-                h5array_sub <- h5array_sub[,cidx]
-               timing <- microbenchmark(sub2 <- as.matrix(h5array_sub), times = ntime, unit = "ms")
-               timing <- summary(timing)[["mean"]]
-            
-                dt2 <- data.table(format = paste0("h5array_by_cell (gzip)", compress)
-                                , time = timing)
-            
-                #h5array_gene
-              if(!is.null(gidx))
-                h5array_sub <- h5array_gene[,gidx]
-              if(!is.null(cidx))
-                h5array_sub <- h5array_sub[cidx,]
-               timing <- microbenchmark(sub3 <- as.matrix(h5array_sub), times = ntime, unit = "ms")
-               timing <- summary(timing)[["mean"]]
-            
-                dt3 <- data.table(format = paste0("h5array_by_gene (gzip)", compress)
-                                , time = timing)
-           
-               
-              #chunked.read.h5 gzip
-              timing <- microbenchmark(sub4 <- h5read.chunked(sc, "data", list(gidx, cidx), block.size = block.size)
+              # h5array_sub <- h5array_cell
+              # if(!is.null(gidx))
+              #   h5array_sub <- h5array_sub[gidx,]
+              # if(!is.null(cidx))
+              #   h5array_sub <- h5array_sub[,cidx]
+              #  timing <- microbenchmark(sub2 <- as.matrix(h5array_sub), times = ntime, unit = "ms")
+              #  timing <- summary(timing)[["mean"]]
+              # 
+              #   dt2 <- data.table(format = paste0("h5array_by_cell (gzip)", compress)
+              #                   , time = timing)
+              # 
+              #   #h5array_gene
+              #   h5array_sub <- h5array_gene
+              # if(!is.null(gidx))
+              #   h5array_sub <- h5array_sub[,gidx]
+              # if(!is.null(cidx))
+              #   h5array_sub <- h5array_sub[cidx,]
+              #  timing <- microbenchmark(sub3 <- as.matrix(h5array_sub), times = ntime, unit = "ms")
+              #  timing <- summary(timing)[["mean"]]
+              # 
+              #   dt3 <- data.table(format = paste0("h5array_by_gene (gzip)", compress)
+              #                   , time = timing)
+              # 
+              #  
+              #hybrid gzip
+              timing <- microbenchmark(sub4 <- h5read.chunked(sc.gz, "data", list(gidx, cidx), block.size = block.size)
                                        , times = ntime, unit = "ms")
               timing <- summary(timing)[["mean"]]
-              dt4 <- data.table(format = paste0("hybrid (gzip)", compress)
+              dt4 <- data.table(format = paste0("hybrid ", compress)
                                 , time = timing)
-              
-              
+              compress <- "lz4"
+              #hybrid lz
+              timing <- microbenchmark(sub2 <- h5read.chunked(sc.lz, "data", list(gidx, cidx), block.size = block.size)
+                                       , times = ntime, unit = "ms")
+              timing <- summary(timing)[["mean"]]
+              dt2 <- data.table(format = paste0("hybrid ", compress)
+                                , time = timing)
+
              
                #h5uncompress
              # h5array <- HDF5Array(h5uncompress, "data")
@@ -136,10 +155,10 @@ if(!file.exists(benchmarkfile))
               
               
 
-              sub3 <- t(sub3)
-              if(!isTRUE(all.equal(sub2, sub4, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub2, sub3, check.attributes = F, tol = 2e-8)))
-                stop("wrong reading!")
-              thisRes <- rbindlist(list(dt2, dt3, dt4))
+              # sub3 <- t(sub3)
+              # if(!isTRUE(all.equal(sub2, sub4, check.attributes = F, tol = 2e-8)))
+              #   stop("wrong reading!")
+              thisRes <- rbindlist(list(dt2, dt4))
                # thisRes <- dt4
               thisRes[,nGenes := nGeneSampleSize]
               thisRes[,nCells := nCellSampleSize]
@@ -157,8 +176,12 @@ if(!file.exists(benchmarkfile))
 ## plot the result
 ```{r fig.width=14}
 
-dt[, slicing := paste0("nGene=", nGenes, " nCell=", nCells)]
-ggplot(dt, aes(y = time, x = format, fill = format )) + geom_col(position = "dodge")  + ylab("time (ms)") + scale_y_log10() +facet_wrap(~slicing)
+# dt[, slicing := paste0("nGene=", nGenes, " nCell=", nCells)]
+# ggplot(dt, aes(y = time, x = format, fill = format )) + geom_col(position = "dodge")  + ylab("time (ms)")  +facet_wrap(~slicing, scales = "free")
+dt[, slicing := ifelse(nGenes == 1e4, "nGenes=1e4", "nCells=1e6")]
+dt[, sampleSize := ifelse(nGenes == 1e4, nCells, nGenes)]
+ ggplot(dt, aes(y = time, x = sampleSize, color = format )) + geom_line() + geom_point()  + ylab("time (ms)")+facet_wrap(~slicing, scales = "free")
+
 
 ```
 

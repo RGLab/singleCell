@@ -93,19 +93,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
-static const R_CallMethodDef CallEntries[] = {
-    {"singleCell_h5createDataset1", (DL_FUNC) &singleCell_h5createDataset1, 7},
-    {"singleCell_h5write1", (DL_FUNC) &singleCell_h5write1, 4},
-    {"singleCell_h5read1", (DL_FUNC) &singleCell_h5read1, 3},
-    {"singleCell_lmdb_open", (DL_FUNC) &singleCell_lmdb_open, 1},
-    {"singleCell_lmdb_close", (DL_FUNC) &singleCell_lmdb_close, 1},
-    {"singleCell_mdb_insert_cols", (DL_FUNC) &singleCell_mdb_insert_cols, 3},
-    {"singleCell_mdb_get_cols", (DL_FUNC) &singleCell_mdb_get_cols, 2},
-    {NULL, NULL, 0}
-};
-
-RcppExport void R_init_singleCell(DllInfo *dll) {
-    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-    R_useDynamicSymbols(dll, FALSE);
+// lzcompress
+Rcpp::RawVector lzcompress(RawVector vec, int acceleration, bool verbose);
+RcppExport SEXP singleCell_lzcompress(SEXP vecSEXP, SEXP accelerationSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< RawVector >::type vec(vecSEXP);
+    Rcpp::traits::input_parameter< int >::type acceleration(accelerationSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(lzcompress(vec, acceleration, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lzdecompress
+RawVector lzdecompress(RawVector input, bool verbose);
+RcppExport SEXP singleCell_lzdecompress(SEXP inputSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< RawVector >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(lzdecompress(input, verbose));
+    return rcpp_result_gen;
+END_RCPP
 }
