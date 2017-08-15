@@ -50,7 +50,7 @@ h5read.chunked.character <- function(x, name, index, ncol, verbose = FALSE, mc.c
       sub <- sub[rind,, drop = FALSE ]
     sub
   }, mc.cores = mc.cores)
-  do.call(cbind,res)
+  do.call(cbind,res)#TODO:this is a significant overhead (sometime cost 50% cpu time)and we should switch to the pre-allocate approach
 }
 
 #' Create the H5 file from matrix
