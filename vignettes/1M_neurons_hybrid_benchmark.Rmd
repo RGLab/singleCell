@@ -93,7 +93,7 @@ idx <- matrix(c( 10,10
 
 ntime <- 10
 # Rprof()
-
+h5array.threshold <- 300
 benchmarkfile <- file.path(path,paste0("dt_", paste(nCells, sep = "_"), ".rds"))
 if(!file.exists(benchmarkfile))
 {
@@ -121,7 +121,7 @@ if(!file.exists(benchmarkfile))
               
               
               compress <- "gzip"
-              if(nGeneSampleSize <=10 ||nCellSampleSize <=10)
+              if(nGeneSampleSize <=h5array.threshold ||nCellSampleSize <=h5array.threshold)
               {
                 
                 
@@ -183,8 +183,9 @@ if(!file.exists(benchmarkfile))
               # sub3 <- t(sub3)
               # if(!isTRUE(all.equal(sub1, sub3, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub4, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub5, check.attributes = F, tol = 2e-8)))
               #   stop("wrong reading!")
+               
                reslist <- list(dt4, dt5)
-               if(nCells <=10 ||nGenes <=10)
+              if(nGeneSampleSize <=h5array.threshold ||nCellSampleSize <=h5array.threshold)
                  reslist <- c(list(dt2, dt3), reslist)
               thisRes <- rbindlist(reslist)
                # thisRes <- dt4
@@ -209,7 +210,9 @@ if(!file.exists(benchmarkfile))
 # ggplot(dt, aes(y = time, x = format, fill = format )) + geom_col(position = "dodge")  + ylab("time (ms)")  +facet_wrap(~slicing, scales = "free")
 dt[, slicing := ifelse(nGenes == 27998, "nGenes=27998", "nCells=1306127")]
 dt[, sampleSize := ifelse(nGenes == 27998, nCells, nGenes)]
- ggplot(dt[format!="hybrid lz4",], aes(y = time, x = sampleSize, color = format )) + geom_line() + geom_point()  + ylab("time (ms)")+facet_wrap(~slicing, scales = "free") + scale_y_log10()
+dt <- dt[format!="hybrid lz4",]
+dt[, format:=sub("gzip","",format)]
+ ggplot(dt, aes(y = time, x = sampleSize, color = format )) + geom_line() + geom_point()  + ylab("time (ms)")+facet_wrap(~slicing, scales = "free") + scale_y_log10()
 
 ```
 

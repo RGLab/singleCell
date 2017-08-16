@@ -237,7 +237,9 @@ if(!file.exists(benchmarkfile))
 # ggplot(dt, aes(y = time, x = format, fill = format )) + geom_col(position = "dodge")  + ylab("time (ms)")  +facet_wrap(~slicing, scales = "free")
 dt[, slicing := ifelse(nGenes == 27998, "nGenes=27998", "nCells=10000")]
 dt[, sampleSize := ifelse(nGenes == 27998, nCells, nGenes)]
- ggplot(dt[format!="hybrid lz4",], aes(y = time, x = sampleSize, color = format )) + geom_line() + geom_point()  + ylab("time (ms)")+facet_wrap(~slicing, scales = "free") + scale_y_log10()
+dt <- dt[format!="hybrid lz4",]
+dt[, format:=sub("gzip","",format)]
+ ggplot(dt, aes(y = time, x = sampleSize, color = format )) + geom_line() + geom_point()  + ylab("time (ms)")+facet_wrap(~slicing, scales = "free") + scale_y_log10()
 
 
 ```
