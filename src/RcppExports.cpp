@@ -48,6 +48,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// h5read2
+void h5read2(std::string filename, std::string ds_name, std::vector<int> src_colIndx, NumericMatrix mat, std::vector<int> dest_colIndx);
+RcppExport SEXP singleCell_h5read2(SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP src_colIndxSEXP, SEXP matSEXP, SEXP dest_colIndxSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type ds_name(ds_nameSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type src_colIndx(src_colIndxSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type dest_colIndx(dest_colIndxSEXP);
+    h5read2(filename, ds_name, src_colIndx, mat, dest_colIndx);
+    return R_NilValue;
+END_RCPP
+}
 // lmdb_open
 List lmdb_open(std::string dbfile);
 RcppExport SEXP singleCell_lmdb_open(SEXP dbfileSEXP) {

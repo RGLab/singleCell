@@ -275,3 +275,105 @@ NumericVector h5read1(std::string filename, std::string ds_name, std::vector<int
   mat.attr("dim") = rdims;
   return mat;
 }
+
+// [[Rcpp::export]]
+void h5read2(std::string filename, std::string ds_name, std::vector<int> src_colIndx
+                        , NumericMatrix mat, std::vector<int> dest_colIndx) 
+{
+  
+  
+  herr_t      status;
+  
+  
+  hid_t fileid = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+  hid_t dataset = H5Dopen2(fileid, "data", H5P_DEFAULT);
+  hid_t dataspace = H5Dget_space(dataset);    /* dataspace handle */
+	  
+	  hsize_t dims[2];
+	  status  = H5Sget_simple_extent_dims(dataspace, dims, NULL); //get dimensions of datset
+	  unsigned nTotal = dims[0];//get total number of cols
+	  unsigned nrow = dims[1];//get total number of cols
+	  
+	  double * data_out = REAL(mat.get__());
+	  
+	  
+	  /*
+	  * Define the memory dataspace.
+	  */
+	  int ncol = src_colIndx.size();
+	  
+	  
+	  hsize_t 	dimsm[2]; //dimenstions
+	  dimsm[0] = mat.ncol();
+	  dimsm[1] = mat.nrow();
+	  // Rcout <<  dimsm[0] << std::endl;
+	  hid_t memspace = H5Screate_simple(2,dimsm,NULL);
+	  if(dimsm[1] != nrow)
+	    Rcpp::stop("src and dest do not have the same nrow!");
+	  /*
+	  * Define hyperslab in the dataset.
+	  */
+	  hsize_t      count[2];              /* size of the hyperslab in the file */
+	  hsize_t      offset[2];             /* hyperslab offset in the file */
+	  hsize_t      count_out[2];          /* size of the hyperslab in memory */
+	  hsize_t      offset_out[2];         /* hyperslab offset in memory */
+	  // double * data_out;
+	  int i;
+	  for(i = 0; i < ncol; i++){
+	    int colStart = src_colIndx.at(i) - 1;
+	    int dest_colStart = dest_colIndx.at(i) - 1;
+	    if(colStart >= nTotal)
+	      Rcpp::stop("H5read error!col index exceeds the src boundary.");
+	    if(dest_colStart >= dimsm[0])
+	      Rcpp::stop("H5read error!col index exceeds the dest boundary.");
+	    
+	    offset[0] = colStart; //start from colStart-th channel
+	    offset[1] = 0; //start from the first event
+	    
+	    count[0]  = 1;//get one channel
+	    count[1]  = nrow; //get all events
+	    
+	    
+	    status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL,
+                                  count, NULL);
+	    
+	    
+	    /*
+	    * Define memory hyperslab.
+	    */
+	    // if(nrow == mat.nrow())//no row subsetting requested
+	    // {
+	      // data_out = &(mat[nrow*dest_colStart]);// use dest as output buffer directly
+	    // }
+	    // else
+	    // {
+	    //   
+	    //   data_out = ;//otherwise,create the temp buffer to receive the data
+	    // }
+	    //  
+	    // Rcout << dest_colStart << std::endl;
+	    offset_out[0] = dest_colStart;//start from ith column
+	    offset_out[1] = 0;//start from 0th event
+	    
+	    count_out[0]  = 1;//one channel
+	    count_out[1]  = nrow; //all events
+	    status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
+                                  count_out, NULL);
+	    
+	    /*
+	     * Read data from hyperslab in the file into the hyperslab in
+	     * memory .
+	     */
+	    status = H5Dread(dataset, H5T_NATIVE_DOUBLE, memspace, dataspace,
+                      H5P_DEFAULT, data_out);
+	    
+	  }
+	  
+	  
+	  H5Dclose(dataset);
+	  H5Sclose(dataspace);
+	  H5Sclose(memspace);
+	  H5Fclose(fileid);
+	  
+	  
+}

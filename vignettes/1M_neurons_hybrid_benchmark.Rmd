@@ -93,7 +93,7 @@ idx <- matrix(c( 10,10
 
 ntime <- 10
 # Rprof()
-h5array.threshold <- 300
+h5array.threshold <- 1000
 benchmarkfile <- file.path(path,paste0("dt_", paste(nCells, sep = "_"), ".rds"))
 if(!file.exists(benchmarkfile))
 {

@@ -13,6 +13,10 @@ h5read1 <- function(filename, ds_name, colIndx) {
     .Call('singleCell_h5read1', PACKAGE = 'singleCell', filename, ds_name, colIndx)
 }
 
+h5read2 <- function(filename, ds_name, src_colIndx, mat, dest_colIndx) {
+    invisible(.Call('singleCell_h5read2', PACKAGE = 'singleCell', filename, ds_name, src_colIndx, mat, dest_colIndx))
+}
+
 lmdb_open <- function(dbfile) {
     .Call('singleCell_lmdb_open', PACKAGE = 'singleCell', dbfile)
 }
