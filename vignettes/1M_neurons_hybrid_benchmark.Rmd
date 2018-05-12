@@ -18,6 +18,7 @@ library(singleCell)
 library(ggplot2)
 # library(TENxGenomics)
 library(HDF5Array)
+library(rhdf5client)
 Sys.setenv(HDF5_PLUGIN_PATH="/home/wjiang2/rglab/workspace/h5lz/src/Release/")
 path <- "/loc/no-backup/mike/shared"
 path <- file.path(path, "1M_neurons")
@@ -29,6 +30,10 @@ h5lz_gene <- file.path(path, "lz_chunk_by_gene.h5")
 h5lz_cell <- file.path(path, "lz_chunk_by_cell.h5")
 h5array_cell <- HDF5Array(h5gz_cell, "data")
 h5array_gene <- HDF5Array(h5gz_gene, "data")
+con = H5S_source("http://52.4.181.237:5102")   
+con = setPath(con, "/home/wjiang2/10x/data") # this is as defined in store
+ds2 = H5S_dataset2(con)
+ds2
 dims <- dim(h5array_gene)
 dims
 nGenes <- dims[2]
@@ -88,12 +93,12 @@ idx <- matrix(c( 10,10
                 # , NA, 2000
 
                   )
-               , ncol =2, byrow = TRUE)[-(1:2),, drop = F]
+               , ncol =2, byrow = TRUE)[(1:2),, drop = F]
 
 
 ntime <- 10
 # Rprof()
-h5array.threshold <- 1000
+h5array.threshold <- 1
 benchmarkfile <- file.path(path,paste0("dt_", paste(nCells, sep = "_"), ".rds"))
 if(!file.exists(benchmarkfile))
 {
@@ -205,12 +210,11 @@ if(!file.exists(benchmarkfile))
 
 ## plot the result
 ```{r fig.width=14}
-
 # dt[, slicing := paste0("nGene=", nGenes, " nCell=", nCells)]
 # ggplot(dt, aes(y = time, x = format, fill = format )) + geom_col(position = "dodge")  + ylab("time (ms)")  +facet_wrap(~slicing, scales = "free")
 dt[, slicing := ifelse(nGenes == 27998, "nGenes=27998", "nCells=1306127")]
 dt[, sampleSize := ifelse(nGenes == 27998, nCells, nGenes)]
-dt <- dt[format!="hybrid lz4",]
+# dt <- dt[format!="hybrid lz4",]
 dt[, format:=sub("gzip","",format)]
  ggplot(dt, aes(y = time, x = sampleSize, color = format )) + geom_line() + geom_point()  + ylab("time (ms)")+facet_wrap(~slicing, scales = "free") + scale_y_log10()
 

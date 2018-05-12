@@ -118,6 +118,7 @@ idx <- matrix(c( 10,10
 
 ntime <- 10
 # Rprof()
+h5array.threshold <- 1
 
 benchmarkfile <- file.path(path,paste0("dt_", paste(nCells, sep = "_"), ".rds"))
 if(!file.exists(benchmarkfile))
@@ -157,6 +158,8 @@ if(!file.exists(benchmarkfile))
                                 , time = timing)
               
               compress <- "gzip"
+              if(nGeneSampleSize <=h5array.threshold ||nCellSampleSize <=h5array.threshold)
+              {
               # by cell
               h5array_sub <- h5array_cell
               if(!is.null(gidx))
@@ -180,7 +183,8 @@ if(!file.exists(benchmarkfile))
 
                 dt3 <- data.table(format = paste0("h5array_by_gene ", compress)
                                 , time = timing)
-
+                sub3 <- t(sub3)
+              }
 
               #hybrid gzip
               timing <- microbenchmark(sub4 <- h5read.chunked(sc.gz, "data", list(gidx, cidx), block.size = block.size)
@@ -211,11 +215,18 @@ if(!file.exists(benchmarkfile))
                H5close()
               
               
+              # if(!isTRUE(all.equal(sub1, sub2, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub3, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub4, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub5, check.attributes = F, tol = 2e-8)))
+              #   stop("wrong reading!")
 
-              sub3 <- t(sub3)
-              if(!isTRUE(all.equal(sub1, sub2, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub3, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub4, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub5, check.attributes = F, tol = 2e-8)))
+              if(!isTRUE(all.equal(sub1, sub4, check.attributes = F, tol = 2e-8))||!isTRUE(all.equal(sub1, sub5, check.attributes = F, tol = 2e-8)))
                 stop("wrong reading!")
-              thisRes <- rbindlist(list(dt1, dt2, dt3, dt4, dt5))
+              
+               reslist <- list(dt1, dt4, dt5)
+              if(nGeneSampleSize <=h5array.threshold ||nCellSampleSize <=h5array.threshold)
+                 reslist <- c(list(dt2, dt3), reslist)
+              thisRes <- rbindlist(reslist)
+              
+              # thisRes <- rbindlist(list(dt1, dt2, dt3, dt4, dt5))
                # thisRes <- dt4
               thisRes[,nGenes := nGeneSampleSize]
               thisRes[,nCells := nCellSampleSize]
