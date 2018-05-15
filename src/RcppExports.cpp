@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // h5createDataset1
 void h5createDataset1(std::string h5file, std::string ds_name, std::vector<int> dims, std::string storage_mode, std::vector<int> chunk_dims, int compressor, int nLevel);
-RcppExport SEXP singleCell_h5createDataset1(SEXP h5fileSEXP, SEXP ds_nameSEXP, SEXP dimsSEXP, SEXP storage_modeSEXP, SEXP chunk_dimsSEXP, SEXP compressorSEXP, SEXP nLevelSEXP) {
+RcppExport SEXP _singleCell_h5createDataset1(SEXP h5fileSEXP, SEXP ds_nameSEXP, SEXP dimsSEXP, SEXP storage_modeSEXP, SEXP chunk_dimsSEXP, SEXP compressorSEXP, SEXP nLevelSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type h5file(h5fileSEXP);
@@ -23,7 +23,7 @@ END_RCPP
 }
 // h5write1
 bool h5write1(Rcpp::NumericMatrix data, std::string filename, std::string ds_name, std::vector<int> colIndx);
-RcppExport SEXP singleCell_h5write1(SEXP dataSEXP, SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP colIndxSEXP) {
+RcppExport SEXP _singleCell_h5write1(SEXP dataSEXP, SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP colIndxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -37,7 +37,7 @@ END_RCPP
 }
 // h5read1
 NumericVector h5read1(std::string filename, std::string ds_name, std::vector<int> colIndx);
-RcppExport SEXP singleCell_h5read1(SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP colIndxSEXP) {
+RcppExport SEXP _singleCell_h5read1(SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP colIndxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -50,7 +50,7 @@ END_RCPP
 }
 // h5read2
 void h5read2(std::string filename, std::string ds_name, std::vector<int> src_colIndx, NumericMatrix mat, std::vector<int> dest_colIndx);
-RcppExport SEXP singleCell_h5read2(SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP src_colIndxSEXP, SEXP matSEXP, SEXP dest_colIndxSEXP) {
+RcppExport SEXP _singleCell_h5read2(SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP src_colIndxSEXP, SEXP matSEXP, SEXP dest_colIndxSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
@@ -64,7 +64,7 @@ END_RCPP
 }
 // lmdb_open
 List lmdb_open(std::string dbfile);
-RcppExport SEXP singleCell_lmdb_open(SEXP dbfileSEXP) {
+RcppExport SEXP _singleCell_lmdb_open(SEXP dbfileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -75,7 +75,7 @@ END_RCPP
 }
 // lmdb_close
 void lmdb_close(List db);
-RcppExport SEXP singleCell_lmdb_close(SEXP dbSEXP) {
+RcppExport SEXP _singleCell_lmdb_close(SEXP dbSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type db(dbSEXP);
@@ -85,7 +85,7 @@ END_RCPP
 }
 // mdb_insert_cols
 void mdb_insert_cols(List db, IntegerVector cidx, Rcpp::List vecs);
-RcppExport SEXP singleCell_mdb_insert_cols(SEXP dbSEXP, SEXP cidxSEXP, SEXP vecsSEXP) {
+RcppExport SEXP _singleCell_mdb_insert_cols(SEXP dbSEXP, SEXP cidxSEXP, SEXP vecsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type db(dbSEXP);
@@ -97,7 +97,7 @@ END_RCPP
 }
 // mdb_get_cols
 List mdb_get_cols(List db, IntegerVector cidx);
-RcppExport SEXP singleCell_mdb_get_cols(SEXP dbSEXP, SEXP cidxSEXP) {
+RcppExport SEXP _singleCell_mdb_get_cols(SEXP dbSEXP, SEXP cidxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -109,7 +109,7 @@ END_RCPP
 }
 // lzcompress
 Rcpp::RawVector lzcompress(RawVector vec, int acceleration, bool verbose);
-RcppExport SEXP singleCell_lzcompress(SEXP vecSEXP, SEXP accelerationSEXP, SEXP verboseSEXP) {
+RcppExport SEXP _singleCell_lzcompress(SEXP vecSEXP, SEXP accelerationSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -122,7 +122,7 @@ END_RCPP
 }
 // lzdecompress
 RawVector lzdecompress(RawVector input, bool verbose);
-RcppExport SEXP singleCell_lzdecompress(SEXP inputSEXP, SEXP verboseSEXP) {
+RcppExport SEXP _singleCell_lzdecompress(SEXP inputSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -131,4 +131,81 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(lzdecompress(input, verbose));
     return rcpp_result_gen;
 END_RCPP
+}
+// create_tiledb
+void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> row_domain, std::vector<unsigned> col_domain);
+RcppExport SEXP _singleCell_create_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP row_domainSEXP, SEXP col_domainSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
+    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type row_domain(row_domainSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type col_domain(col_domainSEXP);
+    create_tiledb(dbdir, attr, row_domain, col_domain);
+    return R_NilValue;
+END_RCPP
+}
+// write_tiledb
+void write_tiledb(std::string dbdir, std::string attr, std::vector<int> data, std::vector<unsigned> coords);
+RcppExport SEXP _singleCell_write_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP dataSEXP, SEXP coordsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
+    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type coords(coordsSEXP);
+    write_tiledb(dbdir, attr, data, coords);
+    return R_NilValue;
+END_RCPP
+}
+// point_selection_tiledb
+IntegerMatrix point_selection_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
+RcppExport SEXP _singleCell_point_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
+    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
+    rcpp_result_gen = Rcpp::wrap(point_selection_tiledb(dbdir, attr, ridx, cidx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// region_selection_tiledb
+IntegerMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
+RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
+    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
+    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx));
+    return rcpp_result_gen;
+END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_singleCell_h5createDataset1", (DL_FUNC) &_singleCell_h5createDataset1, 7},
+    {"_singleCell_h5write1", (DL_FUNC) &_singleCell_h5write1, 4},
+    {"_singleCell_h5read1", (DL_FUNC) &_singleCell_h5read1, 3},
+    {"_singleCell_h5read2", (DL_FUNC) &_singleCell_h5read2, 5},
+    {"_singleCell_lmdb_open", (DL_FUNC) &_singleCell_lmdb_open, 1},
+    {"_singleCell_lmdb_close", (DL_FUNC) &_singleCell_lmdb_close, 1},
+    {"_singleCell_mdb_insert_cols", (DL_FUNC) &_singleCell_mdb_insert_cols, 3},
+    {"_singleCell_mdb_get_cols", (DL_FUNC) &_singleCell_mdb_get_cols, 2},
+    {"_singleCell_lzcompress", (DL_FUNC) &_singleCell_lzcompress, 3},
+    {"_singleCell_lzdecompress", (DL_FUNC) &_singleCell_lzdecompress, 2},
+    {"_singleCell_create_tiledb", (DL_FUNC) &_singleCell_create_tiledb, 4},
+    {"_singleCell_write_tiledb", (DL_FUNC) &_singleCell_write_tiledb, 4},
+    {"_singleCell_point_selection_tiledb", (DL_FUNC) &_singleCell_point_selection_tiledb, 4},
+    {"_singleCell_region_selection_tiledb", (DL_FUNC) &_singleCell_region_selection_tiledb, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_singleCell(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
