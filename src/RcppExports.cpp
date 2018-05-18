@@ -146,29 +146,27 @@ BEGIN_RCPP
 END_RCPP
 }
 // write_tiledb
-void write_tiledb(std::string dbdir, std::string attr, std::vector<int> data, std::vector<unsigned> coords);
-RcppExport SEXP _singleCell_write_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP dataSEXP, SEXP coordsSEXP) {
+void write_tiledb(std::string dbdir, std::string attr, std::vector<int> data, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
+RcppExport SEXP _singleCell_write_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP dataSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type coords(coordsSEXP);
-    write_tiledb(dbdir, attr, data, coords);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
+    write_tiledb(dbdir, attr, data, ridx, cidx);
     return R_NilValue;
 END_RCPP
 }
-// point_selection_tiledb
-IntegerMatrix point_selection_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
-RcppExport SEXP _singleCell_point_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
+// tiledb_dim
+IntegerVector tiledb_dim(std::string dbdir);
+RcppExport SEXP _singleCell_tiledb_dim(SEXP dbdirSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
-    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
-    rcpp_result_gen = Rcpp::wrap(point_selection_tiledb(dbdir, attr, ridx, cidx));
+    rcpp_result_gen = Rcpp::wrap(tiledb_dim(dbdir));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -199,8 +197,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_singleCell_lzcompress", (DL_FUNC) &_singleCell_lzcompress, 3},
     {"_singleCell_lzdecompress", (DL_FUNC) &_singleCell_lzdecompress, 2},
     {"_singleCell_create_tiledb", (DL_FUNC) &_singleCell_create_tiledb, 4},
-    {"_singleCell_write_tiledb", (DL_FUNC) &_singleCell_write_tiledb, 4},
-    {"_singleCell_point_selection_tiledb", (DL_FUNC) &_singleCell_point_selection_tiledb, 4},
+    {"_singleCell_write_tiledb", (DL_FUNC) &_singleCell_write_tiledb, 5},
+    {"_singleCell_tiledb_dim", (DL_FUNC) &_singleCell_tiledb_dim, 1},
     {"_singleCell_region_selection_tiledb", (DL_FUNC) &_singleCell_region_selection_tiledb, 4},
     {NULL, NULL, 0}
 };

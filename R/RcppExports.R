@@ -45,12 +45,12 @@ create_tiledb <- function(dbdir, attr, row_domain, col_domain) {
     invisible(.Call('_singleCell_create_tiledb', PACKAGE = 'singleCell', dbdir, attr, row_domain, col_domain))
 }
 
-write_tiledb <- function(dbdir, attr, data, coords) {
-    invisible(.Call('_singleCell_write_tiledb', PACKAGE = 'singleCell', dbdir, attr, data, coords))
+write_tiledb <- function(dbdir, attr, data, ridx, cidx) {
+    invisible(.Call('_singleCell_write_tiledb', PACKAGE = 'singleCell', dbdir, attr, data, ridx, cidx))
 }
 
-point_selection_tiledb <- function(dbdir, attr, ridx, cidx) {
-    .Call('_singleCell_point_selection_tiledb', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx)
+tiledb_dim <- function(dbdir) {
+    .Call('_singleCell_tiledb_dim', PACKAGE = 'singleCell', dbdir)
 }
 
 region_selection_tiledb <- function(dbdir, attr, ridx, cidx) {

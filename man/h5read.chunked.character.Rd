@@ -5,7 +5,7 @@
 \title{the API only reads data from H5 by chunks (entire columns)}
 \usage{
 \method{h5read.chunked}{character}(x, name, index, ncol, verbose = FALSE,
-  mc.cores = 1, ...)
+  mc.cores = 1, fast = TRUE, ...)
 }
 \description{
 the API only reads data from H5 by chunks (entire columns)
