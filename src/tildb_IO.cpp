@@ -26,7 +26,7 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
   
   // Create array schema
   tiledb::ArraySchema schema(ctx, TILEDB_DENSE);
-  schema.set_order({{TILEDB_COL_MAJOR, TILEDB_ROW_MAJOR}});
+  schema.set_order({{TILEDB_COL_MAJOR, TILEDB_COL_MAJOR}});
   //  schema.set_capacity(2);
   schema.set_domain(domain);
   schema.add_attributes(a1);
@@ -96,7 +96,7 @@ IntegerMatrix region_selection_tiledb(std::string dbdir,  std::string attr, std:
   //check ridx,cidx and buf size
   // Create query
   tiledb::Query query(ctx, dbdir, TILEDB_READ);
-  query.set_layout(TILEDB_COL_MAJOR);
+  query.set_layout(TILEDB_GLOBAL_ORDER);
   
   const std::vector<unsigned> subarray = {(unsigned)ridx[0], (unsigned)ridx[1], (unsigned)cidx[0], (unsigned)cidx[1]};
   query.set_subarray(subarray);
