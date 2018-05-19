@@ -16,7 +16,6 @@
 #'   new("harraySeed", filepath=filepath, ...)
 #' }
 #' 
-#' #' @import methods BiocGenerics S4Vectors IRanges DelayedArray
 #' setClass("harray", contains="DelayedArray")
 #' 
 #' #' @export

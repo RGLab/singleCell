@@ -8,7 +8,8 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Description: This package provides the infrastructures and APIs to store and access the large single cell assay data efficiently
 License: Artistic-2.0
 LazyLoad: yes
-Imports: Matrix, Rcpp, tools
+Depends: methods, BiocGenerics, DelayedArray
+Imports: Matrix, Rcpp, tools, S4Vectors, IRanges
 biocViews: singlecell, DataImport, Preprocessing, DataRepresentation
 LinkingTo: Rcpp, BH(>= 1.60.0-1), Rhdf5lib
 RoxygenNote: 6.0.1

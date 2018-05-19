@@ -33,6 +33,8 @@ chunk_selection.tiledbArraySeed <- function(x, chunk_idx)
   }
   ans
 }
+
+#' @import methods BiocGenerics S4Vectors IRanges DelayedArray
 setMethod("extract_array", "tiledbArraySeed", .extract_array_from_tiledbArraySeed)
 
 setMethod("path", "tiledbArraySeed", function(object) object@filepath)
