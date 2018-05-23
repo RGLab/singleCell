@@ -20,12 +20,12 @@ dim(h5array)
 # idx <- list(1:rsize, 1:csize)
 # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F)
 # a <- extract_array(h5seed, idx)
-a <- extract_array(h5seed, list(1:1000, 1:1000))
-object_size(a)
+# a <- extract_array(h5seed, list(1:1000, 1:1000))
+# object_size(a)
 
 tiledb_dir <- file.path(path, "tiledb_dense_by_col")
 
-write_tiledb_dense(a, tiledb_dir, "count")
+write_tiledb_dense(h5array, tiledb_dir, "count")
 tiledb_dim(tiledb_dir)
 system(paste("du -sh ", tiledb_dir))
 
