@@ -24,6 +24,7 @@ a <- extract_array(h5seed, list(1:1000, 1:1000))
 object_size(a)
 
 tiledb_dir <- file.path(path, "tiledb_dense_by_col")
+
 write_tiledb_dense(a, tiledb_dir, "count")
 tiledb_dim(tiledb_dir)
 system(paste("du -sh ", tiledb_dir))

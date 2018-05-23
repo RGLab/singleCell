@@ -5,7 +5,7 @@ write_tiledb_dense <- function(mat, tiledb_dir, tiledb_attr){
   nrow <- nrow(mat)
   ncol <- ncol(mat)
   if(!dir.exists(tiledb_dir))
-    create_tiledb(tiledb_dir, tiledb_attr, row_domain = c(1,nrow), col_domain = c(1, ncol))
+    create_tiledb(tiledb_dir, tiledb_attr, row_domain = c(1,nrow), col_domain = c(1, ncol), tile_extend = c(1,ncol))#tile by col
   
   ctx <- tiledb::Ctx()
   qry <- tiledb:::tiledb_query(ctx@ptr, tiledb_dir, "WRITE") 

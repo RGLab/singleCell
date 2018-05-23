@@ -4,7 +4,7 @@
 #include <string>
 using namespace Rcpp;
 // [[Rcpp::export]]
-void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> row_domain, std::vector<unsigned> col_domain) {
+void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> row_domain, std::vector<unsigned> col_domain, std::vector<unsigned> tile_extend) {
   // Create TileDB context
   tiledb::Context ctx;
   std::array<unsigned, 2> row = {{row_domain[0], row_domain[1]}};
@@ -12,8 +12,8 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
   
   
   // Create dimensions
-  auto d1 = tiledb::Dimension::create<unsigned>(ctx, "row", row, 1);//tile by col
-  auto d2 = tiledb::Dimension::create<unsigned>(ctx, "col", col, col_domain[1]);
+  auto d1 = tiledb::Dimension::create<unsigned>(ctx, "row", row, tile_extend[0]);
+  auto d2 = tiledb::Dimension::create<unsigned>(ctx, "col", col, tile_extend[1]);
   
 
   // Create domain
