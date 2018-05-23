@@ -9,7 +9,7 @@ Description: This package provides the infrastructures and APIs to store and acc
 License: Artistic-2.0
 LazyLoad: yes
 Depends: methods, BiocGenerics, DelayedArray
-Imports: Matrix, Rcpp, tools, S4Vectors, IRanges
+Imports: Matrix, Rcpp, tools, S4Vectors, IRanges,tiledb
 biocViews: singlecell, DataImport, Preprocessing, DataRepresentation
 LinkingTo: Rcpp, BH(>= 1.60.0-1), Rhdf5lib
 RoxygenNote: 6.0.1
