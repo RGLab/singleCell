@@ -47,31 +47,51 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
   //  return 0;
 }
 // [[Rcpp::export]]
-void write_tiledb(std::string dbdir, std::string attr, std::vector<int> data, std::vector<unsigned> ridx, std::vector<unsigned> cidx) {
-  // Create TileDB context
-  tiledb::Context ctx;
-  
-  // Create query
-  tiledb::Query query(ctx, dbdir, TILEDB_WRITE);
-  query.set_layout(TILEDB_COL_MAJOR);
-  query.set_subarray<unsigned>({ridx[0], ridx[1], cidx[0], cidx[1]});
-  
-  query.set_buffer(attr, data);
-  //  query.set_buffer("a2", a2_buff);
-  //  query.set_buffer("a3", a3_buff);
-  // query.set_coordinates(coords);
-  
-  // Submit query
-  query.submit();
-  // Finalize query
-  query.finalize();
-  
-  // Nothing to clean up - all C++ objects are deleted when exiting scope
-  
-  //  return 0;
+// void write_tiledb(std::string dbdir, std::string attr, std::vector<int> data, std::vector<unsigned> ridx, std::vector<unsigned> cidx) {
+//   // Create TileDB context
+//   tiledb::Context ctx;
+//   
+//   // Create query
+//   tiledb::Query query(ctx, dbdir, TILEDB_WRITE);
+//   query.set_layout(TILEDB_COL_MAJOR);
+//   query.set_subarray<unsigned>({ridx[0], ridx[1], cidx[0], cidx[1]});
+//   
+//   query.set_buffer(attr, data);
+//   //  query.set_buffer("a2", a2_buff);
+//   //  query.set_buffer("a3", a3_buff);
+//   // query.set_coordinates(coords);
+//   
+//   // Submit query
+//   query.submit();
+//   // Finalize query
+//   query.finalize();
+//   
+//   // Nothing to clean up - all C++ objects are deleted when exiting scope
+//   
+//   //  return 0;
+// }
+
+// 
+// // [[Rcpp::export]]
+// void tiledb_query_reset_buffers(XPtr<tiledb::Query> query) {
+//   try {
+//     query->reset_buffers();
+//     
+//   } catch (tiledb::TileDBError& err) {
+//     throw Rcpp::exception(err.what()); 
+//   }
+// }
+
+
+// [[Rcpp::export]]
+void tiledb_query_finalize(XPtr<tiledb::Query> query) {
+  try {
+    query->finalize();
+    
+  } catch (tiledb::TileDBError& err) {
+    throw Rcpp::exception(err.what()); 
+  }
 }
-
-
 // [[Rcpp::export]]
 IntegerVector tiledb_dim(std::string dbdir)
 {

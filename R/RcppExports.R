@@ -49,6 +49,10 @@ write_tiledb <- function(dbdir, attr, data, ridx, cidx) {
     invisible(.Call('_singleCell_write_tiledb', PACKAGE = 'singleCell', dbdir, attr, data, ridx, cidx))
 }
 
+tiledb_query_finalize <- function(query) {
+    invisible(.Call('_singleCell_tiledb_query_finalize', PACKAGE = 'singleCell', query))
+}
+
 tiledb_dim <- function(dbdir) {
     .Call('_singleCell_tiledb_dim', PACKAGE = 'singleCell', dbdir)
 }
