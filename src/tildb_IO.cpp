@@ -47,53 +47,7 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
   //  return 0;
 }
 
-// 
-// // [[Rcpp::export]]
-// void tiledb_query_reset_buffers(XPtr<tiledb::Query> query) {
-//   try {
-//     query->reset_buffers();
-//     
-//   } catch (tiledb::TileDBError& err) {
-//     throw Rcpp::exception(err.what()); 
-//   }
-// }
 
-
-// [[Rcpp::export]]
-void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, std::vector<unsigned> coords) {
-  try {
-    query->set_coordinates(coords);
-    
-  } catch (tiledb::TileDBError& err) {
-    throw Rcpp::exception(err.what()); 
-  }
-}
-
-// [[Rcpp::export]]
-void tiledb_query_finalize(XPtr<tiledb::Query> query) {
-  try {
-    query->finalize();
-    
-  } catch (tiledb::TileDBError& err) {
-    throw Rcpp::exception(err.what()); 
-  }
-}
-// [[Rcpp::export]]
-IntegerVector tiledb_dim(std::string dbdir)
-{
-  tiledb::Context ctx;
-  tiledb::ArraySchema as(ctx, dbdir);
-  
-  auto dm = as.domain().dimensions();
-  unsigned nDim = dm.size();
-  IntegerVector res(nDim);
-  for(unsigned i = 0; i < nDim; i++)
-  {
-    auto bound = dm[i].domain<unsigned>();
-    res[i] = bound.second;
-  }
-  return res;
-}
 // [[Rcpp::export]]
 IntegerMatrix region_selection_tiledb(std::string dbdir,  std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx) {
   // Create TileDB Context

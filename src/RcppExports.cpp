@@ -78,6 +78,47 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// region_selection_tiledb
+IntegerMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
+RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
+    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
+    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// region_selection_tiledb_sparse
+IntegerMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
+RcppExport SEXP _singleCell_region_selection_tiledb_sparse(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
+    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
+    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb_sparse(dbdir, attr, ridx, cidx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// tiledb_query
+XPtr<tiledb::Query> tiledb_query(XPtr<tiledb::Context> ctx, std::string uri, std::string type);
+RcppExport SEXP _singleCell_tiledb_query(SEXP ctxSEXP, SEXP uriSEXP, SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< XPtr<tiledb::Context> >::type ctx(ctxSEXP);
+    Rcpp::traits::input_parameter< std::string >::type uri(uriSEXP);
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(tiledb_query(ctx, uri, type));
+    return rcpp_result_gen;
+END_RCPP
+}
 // tiledb_query_set_coordinates
 void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, std::vector<unsigned> coords);
 RcppExport SEXP _singleCell_tiledb_query_set_coordinates(SEXP querySEXP, SEXP coordsSEXP) {
@@ -110,34 +151,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// region_selection_tiledb
-IntegerMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
-RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
-    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
-    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx));
-    return rcpp_result_gen;
-END_RCPP
-}
-// region_selection_tiledb_sparse
-IntegerMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
-RcppExport SEXP _singleCell_region_selection_tiledb_sparse(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
-    Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
-    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb_sparse(dbdir, attr, ridx, cidx));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_singleCell_h5createDataset1", (DL_FUNC) &_singleCell_h5createDataset1, 7},
@@ -145,11 +158,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_singleCell_h5read1", (DL_FUNC) &_singleCell_h5read1, 3},
     {"_singleCell_h5read2", (DL_FUNC) &_singleCell_h5read2, 5},
     {"_singleCell_create_tiledb", (DL_FUNC) &_singleCell_create_tiledb, 6},
+    {"_singleCell_region_selection_tiledb", (DL_FUNC) &_singleCell_region_selection_tiledb, 4},
+    {"_singleCell_region_selection_tiledb_sparse", (DL_FUNC) &_singleCell_region_selection_tiledb_sparse, 4},
+    {"_singleCell_tiledb_query", (DL_FUNC) &_singleCell_tiledb_query, 3},
     {"_singleCell_tiledb_query_set_coordinates", (DL_FUNC) &_singleCell_tiledb_query_set_coordinates, 2},
     {"_singleCell_tiledb_query_finalize", (DL_FUNC) &_singleCell_tiledb_query_finalize, 1},
     {"_singleCell_tiledb_dim", (DL_FUNC) &_singleCell_tiledb_dim, 1},
-    {"_singleCell_region_selection_tiledb", (DL_FUNC) &_singleCell_region_selection_tiledb, 4},
-    {"_singleCell_region_selection_tiledb_sparse", (DL_FUNC) &_singleCell_region_selection_tiledb_sparse, 4},
     {NULL, NULL, 0}
 };
 

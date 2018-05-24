@@ -21,6 +21,18 @@ create_tiledb <- function(dbdir, attr, row_domain, col_domain, tile_extend, isSp
     invisible(.Call('_singleCell_create_tiledb', PACKAGE = 'singleCell', dbdir, attr, row_domain, col_domain, tile_extend, isSparse))
 }
 
+region_selection_tiledb <- function(dbdir, attr, ridx, cidx) {
+    .Call('_singleCell_region_selection_tiledb', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx)
+}
+
+region_selection_tiledb_sparse <- function(dbdir, attr, ridx, cidx) {
+    .Call('_singleCell_region_selection_tiledb_sparse', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx)
+}
+
+tiledb_query <- function(ctx, uri, type) {
+    .Call('_singleCell_tiledb_query', PACKAGE = 'singleCell', ctx, uri, type)
+}
+
 tiledb_query_set_coordinates <- function(query, coords) {
     invisible(.Call('_singleCell_tiledb_query_set_coordinates', PACKAGE = 'singleCell', query, coords))
 }
@@ -31,13 +43,5 @@ tiledb_query_finalize <- function(query) {
 
 tiledb_dim <- function(dbdir) {
     .Call('_singleCell_tiledb_dim', PACKAGE = 'singleCell', dbdir)
-}
-
-region_selection_tiledb <- function(dbdir, attr, ridx, cidx) {
-    .Call('_singleCell_region_selection_tiledb', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx)
-}
-
-region_selection_tiledb_sparse <- function(dbdir, attr, ridx, cidx) {
-    .Call('_singleCell_region_selection_tiledb_sparse', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx)
 }
 
