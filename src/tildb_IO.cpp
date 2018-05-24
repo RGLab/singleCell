@@ -4,7 +4,7 @@
 #include <string>
 using namespace Rcpp;
 // [[Rcpp::export]]
-void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> row_domain, std::vector<unsigned> col_domain, std::vector<unsigned> tile_extend) {
+void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> row_domain, std::vector<unsigned> col_domain, std::vector<unsigned> tile_extend, bool isSparse = false) {
   // Create TileDB context
   tiledb::Context ctx;
   std::array<unsigned, 2> row = {{row_domain[0], row_domain[1]}};
@@ -25,7 +25,7 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
    a1.set_compressor({TILEDB_LZ4, -1});
   
   // Create array schema
-  tiledb::ArraySchema schema(ctx, TILEDB_DENSE);
+  tiledb::ArraySchema schema(ctx, isSparse?TILEDB_SPARSE:TILEDB_DENSE);
   schema.set_order({{TILEDB_COL_MAJOR, TILEDB_COL_MAJOR}});
   //  schema.set_capacity(2);
   schema.set_domain(domain);
@@ -58,6 +58,16 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
 //   }
 // }
 
+
+// [[Rcpp::export]]
+void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, std::vector<unsigned> coords) {
+  try {
+    query->set_coordinates(coords);
+    
+  } catch (tiledb::TileDBError& err) {
+    throw Rcpp::exception(err.what()); 
+  }
+}
 
 // [[Rcpp::export]]
 void tiledb_query_finalize(XPtr<tiledb::Query> query) {

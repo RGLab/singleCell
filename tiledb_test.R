@@ -20,31 +20,36 @@ dim(h5array)
 # idx <- list(1:rsize, 1:csize)
 # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F)
 # a <- extract_array(h5seed, idx)
-# a <- extract_array(h5seed, list(1:1000, 1:1000))
-# object_size(a)
+a <- extract_array(h5seed, list(1:1000, 1:1000))
+object_size(a)
 
 tiledb_dir <- file.path(path, "tiledb_dense_by_col")
+tiledb_sparse_dir <- file.path(path, "tiledb_sparse_by_col")
 
-write_tiledb_dense(h5array, tiledb_dir, "count")
+# write_tiledb_dense(h5array, tiledb_dir, "count")
+write_tiledb_dense(a, tiledb_dir, "count")
 tiledb_dim(tiledb_dir)
 system(paste("du -sh ", tiledb_dir))
 
+write_tiledb_sparse(a, tiledb_sparse_dir, "count")
+tiledb_dim(tiledb_sparse_dir)
+system(paste("du -sh ", tiledb_sparse_dir))
 
 
 # tileseed <- tiledbArraySeed(tiledb_dir, "count")
 # tilearray <- tiledbArray(tileseed)
 
-size <- 5e2
+size <- 1e3
 idx <- list(1:size, 1:size)
 microbenchmark(
-  # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F)
+  a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F)
   
-   b <- extract_array(h5seed, idx)
+,   b <- extract_array(h5seed, idx)
   # , c <- extract_array(fstseed, idx)
   # , c <- fst.tbl[ridx, cidx]
   
   , c <- region_selection_tiledb(tiledb_dir, "count", c(1,size), c(1,size))
 
-  , times = 1)
-all.equal(c,b)
+  , times = 5)
+all.equal(a,b)
 
