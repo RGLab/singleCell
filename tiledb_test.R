@@ -9,7 +9,7 @@ h5gz_gene <- file.path("gz_chunk_by_gene_sub.h5")
 
 # library(bigmemory)
 ind <- 1:100
-block.size <- 100
+block.size <- 10
 h5seed <- HDF5ArraySeed(h5gz_gene, name = "data")
 h5array <- HDF5Array(h5seed)
 dim(h5array)
@@ -24,7 +24,14 @@ a <- extract_array(h5seed, list(1:1000, 1:1000))
 object_size(a)
 
 tiledb_dir <- file.path("tiledb_dense_by_col")
+if (dir.exists(tiledb_dir)) {
+ unlink(tiledb_dir, recursive = TRUE) 
+}
+
 tiledb_sparse_dir <- file.path("tiledb_sparse_by_col")
+if (dir.exists(tiledb_sparse_dir)) {
+ unlink(tiledb_sparse_dir, recursive = TRUE) 
+}
 
 # write_tiledb_dense(h5array, tiledb_dir, "count")
 write_tiledb_dense(a, tiledb_dir, "count")
