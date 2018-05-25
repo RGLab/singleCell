@@ -64,7 +64,7 @@ void h5createDataset1(std::string h5file
       
   if(compressor == 1)
   {
-    const unsigned int cd_values[1] = {nLevel};     /* lz4 default is 3 */
+    const unsigned int cd_values[1] = {static_cast<unsigned int>(nLevel)};     /* lz4 default is 3 */
     status = H5Pset_filter (dcpl_id, H5Z_FILTER_LZ4, H5Z_FLAG_MANDATORY, (size_t)1, cd_values);
     /* 
      * Check that filter is registered with the library now.
