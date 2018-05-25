@@ -43,6 +43,9 @@ XPtr<tiledb::Query> tiledb_query(XPtr<tiledb::Context> ctx,
 
 // [[Rcpp::export]]
 void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, std::vector<unsigned> coords) {
+  for (int i = 0; i < coords.size(); i++) {
+    std::cout << "DEBUG coord: " << coords[i] << std::endl;
+  }
   try {
     query->set_coordinates(coords);
     

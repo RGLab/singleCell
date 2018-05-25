@@ -34,6 +34,7 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
   // Check array schema
   //  try {
   schema.check();
+  schema.dump();
   //  } catch (tiledb::TileDBError& e) {
   //    std::cout << e.what() << "\n";
   //    return -1;

@@ -3,9 +3,9 @@ library(pryr)
 library(HDF5Array)
 library(microbenchmark)
 
-path <- "/loc/no-backup/mike/shared"
-path <- file.path(path, "1M_neurons")
-h5gz_gene <- file.path(path, "gz_chunk_by_gene_sub.h5")
+#path <- "/loc/no-backup/mike/shared"
+#path <- file.path(path, "1M_neurons")
+h5gz_gene <- file.path("gz_chunk_by_gene_sub.h5")
 
 # library(bigmemory)
 ind <- 1:100
@@ -23,8 +23,8 @@ dim(h5array)
 a <- extract_array(h5seed, list(1:1000, 1:1000))
 object_size(a)
 
-tiledb_dir <- file.path(path, "tiledb_dense_by_col")
-tiledb_sparse_dir <- file.path(path, "tiledb_sparse_by_col")
+tiledb_dir <- file.path("tiledb_dense_by_col")
+tiledb_sparse_dir <- file.path("tiledb_sparse_by_col")
 
 # write_tiledb_dense(h5array, tiledb_dir, "count")
 write_tiledb_dense(a, tiledb_dir, "count")
