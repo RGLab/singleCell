@@ -1,9 +1,5 @@
-## We need C++11 to use TileDB's C++ API
-CXX_STD = CXX11
-
-PKG_CPPFLAGS =	-I../inst/include/
+PKG_CPPFLAGS =	-I../inst/include/ @TILEDB_INCLUDE@
 RHDF5_LIBS=`echo 'Rhdf5lib::pkgconfig("PKG_C_LIBS")'|\
     "${R_HOME}/bin/R" --vanilla --slave`
-TILEDB_LIBS = -ltiledb -Wl,-rpath,/usr/local/lib
+TILEDB_LIBS = @TILEDB_LIBS@
 PKG_LIBS = $(RHDF5_LIBS) -pthread $(TILEDB_LIBS)
-

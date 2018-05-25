@@ -12,4 +12,5 @@ Depends: methods, BiocGenerics, DelayedArray
 Imports: Matrix, Rcpp, tools, S4Vectors, IRanges,tiledb
 biocViews: singlecell, DataImport, Preprocessing, DataRepresentation
 LinkingTo: Rcpp, BH(>= 1.60.0-1), Rhdf5lib
+SystemRequirements: C++11
 RoxygenNote: 6.0.1
