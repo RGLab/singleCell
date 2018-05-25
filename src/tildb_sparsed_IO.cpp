@@ -138,7 +138,7 @@ IntegerMatrix region_selection_tiledb_sparse(std::string dbdir,  std::string att
 
   auto result_el = query.result_buffer_elements();
   auto nElements = result_el[attr].second;
-  Rcout << "DEBUG: " << nElements << std::endl;
+  // Rcout << "DEBUG: " << nElements << std::endl;
   //repopulate buf by assigning elements to its right position
   for(int i = nElements - 1; i >=0; i--)
   {
