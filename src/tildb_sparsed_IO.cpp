@@ -107,7 +107,7 @@ using namespace Rcpp;
 // 
 
 // [[Rcpp::export]]
-IntegerMatrix region_selection_tiledb_sparse(std::string dbdir,  std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx) {
+IntegerMatrix region_selection_tiledb_sparse(std::string dbdir,  std::string attr, std::vector<int> ridx, std::vector<int> cidx) {
   // Create TileDB Context
   tiledb::Context ctx;
 
@@ -116,18 +116,18 @@ IntegerMatrix region_selection_tiledb_sparse(std::string dbdir,  std::string att
   tiledb::Query query(ctx, dbdir, TILEDB_READ);
   query.set_layout(TILEDB_COL_MAJOR);
 
-  const std::vector<unsigned> subarray = {(unsigned)ridx[0], (unsigned)ridx[1], (unsigned)cidx[0], (unsigned)cidx[1]};
+  const std::vector<int> subarray = {ridx[0], ridx[1], cidx[0], cidx[1]};
   query.set_subarray(subarray);
   // Rcout <<  ridx[1] << std::endl;
   auto max_sizes = tiledb::Array::max_buffer_elements(ctx, dbdir, subarray);
   // Rcout << max_sizes[TILEDB_COORDS].second << std::endl;
-  std::vector<unsigned> coords_buff(max_sizes[TILEDB_COORDS].second);
+  std::vector<int> coords_buff(max_sizes[TILEDB_COORDS].second);
 
-  unsigned nrow = ridx[1] - ridx[0] + 1;
-  unsigned ncol = cidx[1] - cidx[0] + 1;
+  int nrow = ridx[1] - ridx[0] + 1;
+  int ncol = cidx[1] - cidx[0] + 1;
   // Rcout << nrow << " " << ncol << std::endl;
   IntegerMatrix mat(nrow, ncol);
-  unsigned size = nrow * ncol;
+  int size = nrow * ncol;
 
   int * buf = &mat[0];
   query.set_buffer(attr, buf, size);
@@ -138,7 +138,7 @@ IntegerMatrix region_selection_tiledb_sparse(std::string dbdir,  std::string att
 
   auto result_el = query.result_buffer_elements();
   auto nElements = result_el[attr].second;
-  // Rcout << nElements << std::endl;
+  Rcout << "DEBUG: " << nElements << std::endl;
   //repopulate buf by assigning elements to its right position
   for(int i = nElements - 1; i >=0; i--)
   {

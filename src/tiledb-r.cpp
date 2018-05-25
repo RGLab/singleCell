@@ -42,13 +42,9 @@ XPtr<tiledb::Query> tiledb_query(XPtr<tiledb::Context> ctx,
 }
 
 // [[Rcpp::export]]
-void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, std::vector<unsigned> coords) {
-  for (int i = 0; i < coords.size(); i++) {
-    std::cout << "DEBUG coord: " << coords[i] << std::endl;
-  }
+void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, IntegerVector coords) {
   try {
-    query->set_coordinates(coords);
-    
+    query->set_coordinates(coords.begin(), coords.size());
   } catch (tiledb::TileDBError& err) {
     throw Rcpp::exception(err.what()); 
   }
@@ -63,6 +59,7 @@ void tiledb_query_finalize(XPtr<tiledb::Query> query) {
     throw Rcpp::exception(err.what()); 
   }
 }
+
 // [[Rcpp::export]]
 IntegerVector tiledb_dim(std::string dbdir)
 {
@@ -74,7 +71,7 @@ IntegerVector tiledb_dim(std::string dbdir)
   IntegerVector res(nDim);
   for(unsigned i = 0; i < nDim; i++)
   {
-    auto bound = dm[i].domain<unsigned>();
+    auto bound = dm[i].domain<int>();
     res[i] = bound.second;
   }
   return res;

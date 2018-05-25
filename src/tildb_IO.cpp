@@ -4,16 +4,16 @@
 #include <string>
 using namespace Rcpp;
 // [[Rcpp::export]]
-void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> row_domain, std::vector<unsigned> col_domain, std::vector<unsigned> tile_extend, bool isSparse = false) {
+void create_tiledb(std::string dbdir, std::string attr, std::vector<int> row_domain, std::vector<int> col_domain, std::vector<unsigned> tile_extend, bool isSparse = false) {
   // Create TileDB context
   tiledb::Context ctx;
-  std::array<unsigned, 2> row = {{row_domain[0], row_domain[1]}};
-  std::array<unsigned, 2> col = {{col_domain[0], col_domain[1]}};
+  std::array<int, 2> row = {{row_domain[0], row_domain[1]}};
+  std::array<int, 2> col = {{col_domain[0], col_domain[1]}};
   
   
   // Create dimensions
-  auto d1 = tiledb::Dimension::create<unsigned>(ctx, "row", row, tile_extend[0]);
-  auto d2 = tiledb::Dimension::create<unsigned>(ctx, "col", col, tile_extend[1]);
+  auto d1 = tiledb::Dimension::create<int>(ctx, "row", row, tile_extend[0]);
+  auto d2 = tiledb::Dimension::create<int>(ctx, "col", col, tile_extend[1]);
   
 
   // Create domain
@@ -50,7 +50,10 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ro
 
 
 // [[Rcpp::export]]
-IntegerMatrix region_selection_tiledb(std::string dbdir,  std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx) {
+IntegerMatrix region_selection_tiledb(std::string dbdir, 
+                                      std::string attr, 
+                                      std::vector<int> ridx, 
+                                      std::vector<int> cidx) {
   // Create TileDB Context
   tiledb::Context ctx;
 
@@ -59,17 +62,17 @@ IntegerMatrix region_selection_tiledb(std::string dbdir,  std::string attr, std:
   tiledb::Query query(ctx, dbdir, TILEDB_READ);
   query.set_layout(TILEDB_GLOBAL_ORDER);
   
-  const std::vector<unsigned> subarray = {(unsigned)ridx[0], (unsigned)ridx[1], (unsigned)cidx[0], (unsigned)cidx[1]};
+  const std::vector<int> subarray = {ridx[0], ridx[1], cidx[0], cidx[1]};
   query.set_subarray(subarray);
   // Rcout <<  ridx[1] << std::endl;
   auto max_sizes = tiledb::Array::max_buffer_elements(ctx, dbdir, subarray);
   // Rcout << max_sizes[TILEDB_COORDS].second << std::endl;
 
-  unsigned nrow = ridx[1] - ridx[0] + 1;
-  unsigned ncol = cidx[1] - cidx[0] + 1;
+  int nrow = ridx[1] - ridx[0] + 1;
+  int ncol = cidx[1] - cidx[0] + 1;
   // Rcout << nrow << " " << ncol << std::endl;
   IntegerMatrix mat(nrow, ncol);
-  unsigned size = nrow * ncol;
+  int size = nrow * ncol;
   
   int * buf = &mat[0];
   query.set_buffer(attr, buf, size);
@@ -77,6 +80,5 @@ IntegerMatrix region_selection_tiledb(std::string dbdir,  std::string attr, std:
   query.submit();
   query.finalize();
   
-  
-   return mat;
+  return mat;
 }

@@ -64,14 +64,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // create_tiledb
-void create_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> row_domain, std::vector<unsigned> col_domain, std::vector<unsigned> tile_extend, bool isSparse);
+void create_tiledb(std::string dbdir, std::string attr, std::vector<int> row_domain, std::vector<int> col_domain, std::vector<unsigned> tile_extend, bool isSparse);
 RcppExport SEXP _singleCell_create_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP row_domainSEXP, SEXP col_domainSEXP, SEXP tile_extendSEXP, SEXP isSparseSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type row_domain(row_domainSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type col_domain(col_domainSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type row_domain(row_domainSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type col_domain(col_domainSEXP);
     Rcpp::traits::input_parameter< std::vector<unsigned> >::type tile_extend(tile_extendSEXP);
     Rcpp::traits::input_parameter< bool >::type isSparse(isSparseSEXP);
     create_tiledb(dbdir, attr, row_domain, col_domain, tile_extend, isSparse);
@@ -79,29 +79,29 @@ BEGIN_RCPP
 END_RCPP
 }
 // region_selection_tiledb
-IntegerMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
+IntegerMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx);
 RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type cidx(cidxSEXP);
     rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx));
     return rcpp_result_gen;
 END_RCPP
 }
 // region_selection_tiledb_sparse
-IntegerMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<unsigned> ridx, std::vector<unsigned> cidx);
+IntegerMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx);
 RcppExport SEXP _singleCell_region_selection_tiledb_sparse(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type ridx(ridxSEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type cidx(cidxSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type cidx(cidxSEXP);
     rcpp_result_gen = Rcpp::wrap(region_selection_tiledb_sparse(dbdir, attr, ridx, cidx));
     return rcpp_result_gen;
 END_RCPP
@@ -120,12 +120,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // tiledb_query_set_coordinates
-void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, std::vector<unsigned> coords);
+void tiledb_query_set_coordinates(XPtr<tiledb::Query> query, IntegerVector coords);
 RcppExport SEXP _singleCell_tiledb_query_set_coordinates(SEXP querySEXP, SEXP coordsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< XPtr<tiledb::Query> >::type query(querySEXP);
-    Rcpp::traits::input_parameter< std::vector<unsigned> >::type coords(coordsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type coords(coordsSEXP);
     tiledb_query_set_coordinates(query, coords);
     return R_NilValue;
 END_RCPP

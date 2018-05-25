@@ -9,7 +9,7 @@ h5gz_gene <- file.path("gz_chunk_by_gene_sub.h5")
 
 # library(bigmemory)
 ind <- 1:100
-block.size <- 10
+block.size <- 100
 h5seed <- HDF5ArraySeed(h5gz_gene, name = "data")
 h5array <- HDF5Array(h5seed)
 dim(h5array)
@@ -42,14 +42,9 @@ system(paste("du -sh ", tiledb_sparse_dir))
 size <- 1e3
 idx <- list(1:size, 1:size)
 microbenchmark(
-  a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F)
-  
-,   b <- extract_array(h5seed, idx)
-  # , c <- extract_array(fstseed, idx)
-  # , c <- fst.tbl[ridx, cidx]
-  
-  , c <- region_selection_tiledb(tiledb_dir, "count", c(1,size), c(1,size))
-
+  a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F),
+  b <- extract_array(h5seed, idx),
+  c <- region_selection_tiledb(tiledb_dir, "count", c(1,size), c(1,size)),
+  d <- region_selection_tiledb_sparse(tiledb_sparse_dir, "count", c(1,size), c(1,size))
   , times = 5)
-all.equal(a,b)
-
+all.equal(a,b,c,d)
