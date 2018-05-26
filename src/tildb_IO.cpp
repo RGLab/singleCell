@@ -1,6 +1,5 @@
 #include <Rcpp.h>
-#include <tiledb/query.h>
-#include <tiledb/array.h>
+#include <tiledb/tiledb>
 #include <string>
 using namespace Rcpp;
 // [[Rcpp::export]]
@@ -53,9 +52,9 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<int> row_dom
 IntegerMatrix region_selection_tiledb(std::string dbdir, 
                                       std::string attr, 
                                       std::vector<int> ridx, 
-                                      std::vector<int> cidx) {
+                                      std::vector<int> cidx, XPtr<tiledb::Config> cfg) {
   // Create TileDB Context
-  tiledb::Context ctx;
+  tiledb::Context ctx(*cfg.get());
 
   //check ridx,cidx and buf size
   // Create query

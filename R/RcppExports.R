@@ -21,12 +21,12 @@ create_tiledb <- function(dbdir, attr, row_domain, col_domain, tile_extend, isSp
     invisible(.Call('_singleCell_create_tiledb', PACKAGE = 'singleCell', dbdir, attr, row_domain, col_domain, tile_extend, isSparse))
 }
 
-region_selection_tiledb <- function(dbdir, attr, ridx, cidx) {
-    .Call('_singleCell_region_selection_tiledb', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx)
+region_selection_tiledb <- function(dbdir, attr, ridx, cidx, cfg) {
+    .Call('_singleCell_region_selection_tiledb', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx, cfg)
 }
 
-region_selection_tiledb_sparse <- function(dbdir, attr, ridx, cidx) {
-    .Call('_singleCell_region_selection_tiledb_sparse', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx)
+region_selection_tiledb_sparse <- function(dbdir, attr, ridx, cidx, cfg) {
+    .Call('_singleCell_region_selection_tiledb_sparse', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx, cfg)
 }
 
 tiledb_query <- function(ctx, uri, type) {

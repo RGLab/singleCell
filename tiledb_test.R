@@ -46,13 +46,16 @@ system(paste("du -sh ", tiledb_sparse_dir))
 
 # tileseed <- tiledbArraySeed(tiledb_dir, "count")
 # tilearray <- tiledbArray(tileseed)
-
+cfg <- tiledb:::Config()
+cfg["vfs.num_threads"] <- 4
+cfg["vfs.file.max_parallel_ops"] <- 4
+cfg
 size <- 1e3
 idx <- list(1:size, 1:size)
 microbenchmark(
   # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F),
   b <- extract_array(h5seed, idx),
   # c <- region_selection_tiledb(tiledb_dir, "count", c(1,size), c(1,size)),
-  d <- region_selection_tiledb_sparse(tiledb_sparse_dir, "count", c(1,size), c(1,size))
+  d <- region_selection_tiledb_sparse(tiledb_sparse_dir, "count", c(1,size), c(1,size), cfg@ptr)
   , times = 5)
 all.equal(b,d)
