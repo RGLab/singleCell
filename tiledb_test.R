@@ -14,32 +14,32 @@ h5seed <- HDF5ArraySeed(h5gz_gene, name = "data")
 h5array <- HDF5Array(h5seed)
 dim(h5array)
 
+tiledb_dir <- file.path(path, "tiledb_dense_by_col_sub")
+tiledb_sparse_dir <- file.path(path, "tiledb_sparse_by_col_sub")
+
 
 #create tiledb
-rsize <- 1e4
-csize <- 27998
-idx <- list(1:rsize, 1:csize)
+# rsize <- 1e4
+# csize <- 27998
+# idx <- list(1:rsize, 1:csize)
 # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F)
 # a <- extract_array(h5seed, idx)
 # a <- extract_array(h5seed, list(1:1000, 1:1000))
 # object_size(a)
 
-tiledb_dir <- file.path(path, "tiledb_dense_by_col")
-if (dir.exists(tiledb_dir)) {
- unlink(tiledb_dir, recursive = TRUE) 
-}
 
-tiledb_sparse_dir <- file.path(path, "tiledb_sparse_by_col")
-if (dir.exists(tiledb_sparse_dir)) {
- unlink(tiledb_sparse_dir, recursive = TRUE) 
-}
+# if (dir.exists(tiledb_dir)) {
+#  unlink(tiledb_dir, recursive = TRUE) 
+# }
+# if (dir.exists(tiledb_sparse_dir)) {
+#  unlink(tiledb_sparse_dir, recursive = TRUE) 
+# }
+# 
+# # write_tiledb_dense(h5array, tiledb_dir, "count")
+# write_tiledb_dense(h5seed, tiledb_dir, "count")
 
-# write_tiledb_dense(h5array, tiledb_dir, "count")
-write_tiledb_dense(h5seed, tiledb_dir, "count")
-tiledb_dim(tiledb_dir)
-
-write_tiledb_sparse(h5seed, tiledb_sparse_dir, "count")
-tiledb_dim(tiledb_sparse_dir)
+# 
+# write_tiledb_sparse(h5seed, tiledb_sparse_dir, "count")
 
 
 system(paste("du -sh ", h5gz_gene))
@@ -47,19 +47,32 @@ system(paste("du -sh ", tiledb_dir))
 system(paste("du -sh ", tiledb_sparse_dir))
 
 
-tileseed <- tiledbArraySeed(tiledb_sparse_dir, "count")
-tilearray <- tiledbArray(tileseed)
 cfg <- tiledb:::Config()
 cfg["vfs.num_threads"] <- 1
 cfg["vfs.file.max_parallel_ops"] <- 1
-cfg
-size <- 1e3
+cfg# tiledb_dim(tiledb_dir)
+size <- 1e1
 idx <- list(1:size, 1:size)
+#native API calls
 microbenchmark(
   # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F),
   # a <- chunked.read(h5seed, idx, block.size = block.size),
   b <- extract_array(h5seed, idx),
   c <- region_selection_tiledb(tiledb_dir, "count", c(1,size), c(1,size), cfg@ptr),
   d <- region_selection_tiledb_sparse(tiledb_sparse_dir, "count", c(1,size), c(1,size), cfg@ptr)
-  , times = 10)
+  , times = 5)
 all.equal(b,c)
+
+#abstract generic API chunked.read
+tileseed <- tiledbArraySeed(tiledb_dir, "count")
+tilesparseseed <- tiledbArraySeed(tiledb_dir, "count", sparse = T)
+# tilearray <- tiledbArray(tileseed)
+dim(tilesparseseed)
+microbenchmark(
+  # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F),
+  a <- chunked.read(h5seed, idx, block.size = block.size),
+  # b <- extract_array(h5seed, idx),
+  # c <- chunked.read(h5seed, idx, block.size = block.size),
+  d <- chunked.read(tileseed, idx, block.size = block.size)
+  , times = 5)
+all.equal(a,d)

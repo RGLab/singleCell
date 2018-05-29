@@ -16,13 +16,23 @@ setClass("tiledbSparseArraySeed", contains = "tiledbArraySeed")
 chunk_selection.tiledbArraySeed <- function(x, chunk_idx)
 {
   nrow <- dim(x)[1]
+  cfg <- tiledb:::Config()
+  cfg["vfs.num_threads"] <- 1
+  cfg["vfs.file.max_parallel_ops"] <- 1
+  
   res <- lapply(chunk_idx, function(j){
-    ifis(x, "tiledbSparseArraySeed")
-      region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j))
-    })
-    
+    if(is(x, "tiledbSparseArraySeed"))
+      region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j), cfg@ptr)
+    else
+      region_selection_tiledb(path(x), x@name, c(1,nrow), c(j,j), cfg@ptr)
+  })
+  
   do.call(cbind, res)
 }
+
+
+#' @import methods BiocGenerics S4Vectors IRanges DelayedArray
+setMethod("extract_array", "tiledbArraySeed", definition = function(x, index).extract_array_from_tiledbArraySeed(x, index))
 
 .extract_array_from_tiledbArraySeed <- function(x, index)
 {
@@ -36,8 +46,25 @@ chunk_selection.tiledbArraySeed <- function(x, chunk_idx)
   ans
 }
 
-#' @import methods BiocGenerics S4Vectors IRanges DelayedArray
-setMethod("extract_array", "tiledbArraySeed", .extract_array_from_tiledbArraySeed)
+
+# setMethod("extract_array", "tiledbSparseArraySeed", .extract_array_from_tiledbSparseArraySeed)
+# 
+# .extract_array_from_tiledbSparseArraySeed <- function(x, index)
+# {
+#   ans_dim <- DelayedArray:::get_Nindex_lengths(index, dim(x))
+#   if (any(ans_dim == 0L)) {
+#     ans <- x@first_val[0]
+#     dim(ans) <- ans_dim
+#   } else {
+#     cfg <- tiledb:::Config()
+#     cfg["vfs.num_threads"] <- 1
+#     cfg["vfs.file.max_parallel_ops"] <- 1
+#     
+#     ans <- region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j), cfg@ptr)
+# 
+#   }
+#   ans
+# }
 
 setMethod("path", "tiledbArraySeed", function(object) object@filepath)
 
@@ -49,7 +76,7 @@ setMethod("path", "tiledbArraySeed", function(object) object@filepath)
               "to the tiledb dir where the dataset is located"))
   file_path_as_absolute(path)
 }
-tiledbArraySeed <- function(filepath, name, type=NA)
+tiledbArraySeed <- function(filepath, name, type=NA, sparse = FALSE)
 {
   filepath <- .normarg_path(filepath, "'filepath'")
   if (!isSingleString(name))
@@ -70,7 +97,7 @@ tiledbArraySeed <- function(filepath, name, type=NA)
     if (!is.atomic(first_val))
       stop(wmsg("invalid type: ", type))
   } else {
-    first_val <- .read_dataset_first_val(filepath, name, length(dim))
+    first_val <- .read_dataset_first_val(filepath, name, length(dim), sparse)
     detected_type <- typeof(first_val)
     if (!(is.na(type) || type == detected_type))
       warning(wmsg("The type specified via the 'type' argument (",
@@ -79,7 +106,10 @@ tiledbArraySeed <- function(filepath, name, type=NA)
                    "former."))
   }
   # chunkdim <- h5chunkdim(filepath, name)
-  new2("tiledbArraySeed", filepath=filepath,
+  cls <- ifelse(sparse, "tiledbSparseArraySeed", "tiledbArraySeed")
+    
+  
+  new2(cls, filepath=filepath,
        name=name,
        dim=dim,
        first_val=first_val
@@ -87,10 +117,17 @@ tiledbArraySeed <- function(filepath, name, type=NA)
        )
 }
 
-.read_dataset_first_val <- function(filepath, name, ndim)
+.read_dataset_first_val <- function(filepath, name, ndim, sparse)
 {
+  cfg <- tiledb:::Config()
+  cfg["vfs.num_threads"] <- 1
+  cfg["vfs.file.max_parallel_ops"] <- 1
+  
   # index <- rep.int(list(1L), ndim)
-  ans <- region_selection_tiledb(filepath, name, c(1,1), c(1,1))
+  if(sparse)
+    ans <- region_selection_tiledb_sparse(filepath, name, c(1,1), c(1,1), cfg@ptr)
+  else
+    ans <- region_selection_tiledb(filepath, name, c(1,1), c(1,1), cfg@ptr)
 
   stopifnot(length(ans) == 1L)  # sanity check
   ans[[1L]]  # drop any attribute
