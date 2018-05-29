@@ -11,12 +11,14 @@ setClass("tiledbArraySeed",
            # , chunkdim="integer_OR_NULL"
          )
 )
-
+setClass("tiledbSparseArraySeed", contains = "tiledbArraySeed")
+         
 chunk_selection.tiledbArraySeed <- function(x, chunk_idx)
 {
   nrow <- dim(x)[1]
   res <- lapply(chunk_idx, function(j){
-    region_selection_tiledb(path(x), x@name, c(1,nrow), c(j,j))
+    ifis(x, "tiledbSparseArraySeed")
+      region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j))
     })
     
   do.call(cbind, res)
