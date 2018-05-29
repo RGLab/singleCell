@@ -46,9 +46,10 @@ NumericMatrix region_selection_tiledb_sparse(std::string dbdir
                                                ,  std::string attr
                                                , std::vector<int> ridx
                                                , std::vector<int> cidx
-                                               , XPtr<tiledb::Config> cfg) {
+                                               , XPtr<tiledb::Context> ctx_ptr) {
   // Create TileDB Context
-  tiledb::Context ctx(*cfg.get());
+  tiledb::Context ctx = *ctx_ptr.get();
+  
 
   //check ridx,cidx and buf size
   // Create query

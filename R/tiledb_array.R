@@ -19,12 +19,12 @@ chunk_selection.tiledbArraySeed <- function(x, chunk_idx)
   cfg <- tiledb:::Config()
   cfg["vfs.num_threads"] <- 1
   cfg["vfs.file.max_parallel_ops"] <- 1
-  
+  ctx <- tiledb::Ctx(cfg)
   res <- lapply(chunk_idx, function(j){
     if(is(x, "tiledbSparseArraySeed"))
-      region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j), cfg@ptr)
+      region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j), ctx@ptr)
     else
-      region_selection_tiledb(path(x), x@name, c(1,nrow), c(j,j), cfg@ptr)
+      region_selection_tiledb(path(x), x@name, c(1,nrow), c(j,j), ctx@ptr)
   })
   
   do.call(cbind, res)
@@ -122,12 +122,13 @@ tiledbArraySeed <- function(filepath, name, type=NA, sparse = FALSE)
   cfg <- tiledb:::Config()
   cfg["vfs.num_threads"] <- 1
   cfg["vfs.file.max_parallel_ops"] <- 1
+  ctx <- tiledb::Ctx(cfg)
   
   # index <- rep.int(list(1L), ndim)
   if(sparse)
-    ans <- region_selection_tiledb_sparse(filepath, name, c(1,1), c(1,1), cfg@ptr)
+    ans <- region_selection_tiledb_sparse(filepath, name, c(1,1), c(1,1), ctx@ptr)
   else
-    ans <- region_selection_tiledb(filepath, name, c(1,1), c(1,1), cfg@ptr)
+    ans <- region_selection_tiledb(filepath, name, c(1,1), c(1,1), ctx@ptr)
 
   stopifnot(length(ans) == 1L)  # sanity check
   ans[[1L]]  # drop any attribute

@@ -51,7 +51,7 @@ cfg <- tiledb:::Config()
 cfg["vfs.num_threads"] <- 1
 cfg["vfs.file.max_parallel_ops"] <- 1
 cfg# tiledb_dim(tiledb_dir)
-size <- 1e1
+size <- 3e1
 idx <- list(1:size, 1:size)
 #native API calls
 microbenchmark(
@@ -74,5 +74,7 @@ microbenchmark(
   # b <- extract_array(h5seed, idx),
   # c <- chunked.read(h5seed, idx, block.size = block.size),
   d <- chunked.read(tileseed, idx, block.size = block.size)
-  , times = 5)
+  , times = 1)
 all.equal(a,d)
+library(profvis)
+profvis(d <- chunked.read(tileseed, idx, block.size = block.size))

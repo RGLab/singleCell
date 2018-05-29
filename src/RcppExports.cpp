@@ -79,8 +79,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // region_selection_tiledb
-NumericMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Config> cfg);
-RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP cfgSEXP) {
+NumericMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Context> ctx);
+RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP ctxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,14 +88,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type ridx(ridxSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type cidx(cidxSEXP);
-    Rcpp::traits::input_parameter< XPtr<tiledb::Config> >::type cfg(cfgSEXP);
-    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx, cfg));
+    Rcpp::traits::input_parameter< XPtr<tiledb::Context> >::type ctx(ctxSEXP);
+    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx, ctx));
     return rcpp_result_gen;
 END_RCPP
 }
 // region_selection_tiledb_sparse
-NumericMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Config> cfg);
-RcppExport SEXP _singleCell_region_selection_tiledb_sparse(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP cfgSEXP) {
+NumericMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Context> ctx);
+RcppExport SEXP _singleCell_region_selection_tiledb_sparse(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP ctxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -103,8 +103,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type ridx(ridxSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type cidx(cidxSEXP);
-    Rcpp::traits::input_parameter< XPtr<tiledb::Config> >::type cfg(cfgSEXP);
-    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb_sparse(dbdir, attr, ridx, cidx, cfg));
+    Rcpp::traits::input_parameter< XPtr<tiledb::Context> >::type ctx(ctxSEXP);
+    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb_sparse(dbdir, attr, ridx, cidx, ctx));
     return rcpp_result_gen;
 END_RCPP
 }

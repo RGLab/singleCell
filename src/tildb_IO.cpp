@@ -52,9 +52,10 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<int> row_dom
 NumericMatrix region_selection_tiledb(std::string dbdir, 
                                       std::string attr, 
                                       std::vector<int> ridx, 
-                                      std::vector<int> cidx, XPtr<tiledb::Config> cfg) {
+                                      std::vector<int> cidx
+                                      , XPtr<tiledb::Context> ctx_ptr) {
   // Create TileDB Context
-  tiledb::Context ctx(*cfg.get());
+  tiledb::Context ctx = *ctx_ptr.get();
 
   //check ridx,cidx and buf size
   // Create query
