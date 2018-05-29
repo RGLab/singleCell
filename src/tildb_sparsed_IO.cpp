@@ -107,7 +107,7 @@ using namespace Rcpp;
 // 
 
 // [[Rcpp::export]]
-IntegerMatrix region_selection_tiledb_sparse(std::string dbdir
+NumericMatrix region_selection_tiledb_sparse(std::string dbdir
                                                ,  std::string attr
                                                , std::vector<int> ridx
                                                , std::vector<int> cidx
@@ -130,10 +130,10 @@ IntegerMatrix region_selection_tiledb_sparse(std::string dbdir
   int nrow = ridx[1] - ridx[0] + 1;
   int ncol = cidx[1] - cidx[0] + 1;
   // Rcout << nrow << " " << ncol << std::endl;
-  IntegerMatrix mat(nrow, ncol);
+  NumericMatrix mat(nrow, ncol);
   int size = nrow * ncol;
 
-  int * buf = &mat[0];
+  double * buf = &mat[0];
   query.set_buffer(attr, buf, size);
   query.set_coordinates(coords_buff);
 

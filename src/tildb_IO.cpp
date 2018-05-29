@@ -20,8 +20,8 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<int> row_dom
   domain.add_dimension(d1).add_dimension(d2);
   
   // Create attributes
-  tiledb::Attribute a1 = tiledb::Attribute::create<int>(ctx, attr);
-   a1.set_compressor({TILEDB_LZ4, -1});
+  tiledb::Attribute a1 = tiledb::Attribute::create<double>(ctx, attr);
+   a1.set_compressor({TILEDB_GZIP, -1});//default level
   
   // Create array schema
   tiledb::ArraySchema schema(ctx, isSparse?TILEDB_SPARSE:TILEDB_DENSE);
@@ -49,7 +49,7 @@ void create_tiledb(std::string dbdir, std::string attr, std::vector<int> row_dom
 
 
 // [[Rcpp::export]]
-IntegerMatrix region_selection_tiledb(std::string dbdir, 
+NumericMatrix region_selection_tiledb(std::string dbdir, 
                                       std::string attr, 
                                       std::vector<int> ridx, 
                                       std::vector<int> cidx, XPtr<tiledb::Config> cfg) {
@@ -70,10 +70,10 @@ IntegerMatrix region_selection_tiledb(std::string dbdir,
   int nrow = ridx[1] - ridx[0] + 1;
   int ncol = cidx[1] - cidx[0] + 1;
   // Rcout << nrow << " " << ncol << std::endl;
-  IntegerMatrix mat(nrow, ncol);
+  NumericMatrix mat(nrow, ncol);
   int size = nrow * ncol;
   
-  int * buf = &mat[0];
+  double * buf = &mat[0];
   query.set_buffer(attr, buf, size);
 
   query.submit();

@@ -12,8 +12,12 @@ write_tiledb_dense <- function(mat, tiledb_dir, tiledb_attr){
   qry <- tiledb:::tiledb_query_set_layout(qry, "GLOBAL_ORDER")
   for(j in seq_len(ncol))
   {
-    
-    qry <- tiledb:::tiledb_query_set_buffer(qry, tiledb_attr, as.integer(mat[, j]))
+    message(j)
+    if(is(mat , "Array"))
+      vec <- extract_array(mat, list(NULL, j))
+    else
+      vec <- mat[, j]
+    qry <- tiledb:::tiledb_query_set_buffer(qry, tiledb_attr, as.numeric(vec))
     qry <- tiledb:::tiledb_query_submit(qry)
     if (tiledb:::tiledb_query_status(qry) != "COMPLETE") {
       stop("error in write query") 
@@ -38,7 +42,11 @@ write_tiledb_sparse <- function(mat, tiledb_dir, tiledb_attr){
   qry <- tiledb:::tiledb_query_set_layout(qry, "GLOBAL_ORDER") 
   for(j in seq_len(ncol))
   {
-    vec <- as.integer(mat[, j])
+    if(is(mat , "Array"))
+      vec <- extract_array(mat, list(NULL, j))
+    else
+      vec <- mat[, j]
+    vec <- as.numeric(vec)
     ridx <- which(vec>0)
     if(length(ridx) > 0)
     {
