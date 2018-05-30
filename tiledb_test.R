@@ -50,31 +50,71 @@ system(paste("du -sh ", tiledb_sparse_dir))
 cfg <- tiledb:::Config()
 cfg["vfs.num_threads"] <- 1
 cfg["vfs.file.max_parallel_ops"] <- 1
-cfg# tiledb_dim(tiledb_dir)
-size <- 3e1
+ctx <- tiledb::Ctx(cfg)
+size <- 1e2
 idx <- list(1:size, 1:size)
-#native API calls
+
+#' ##native API calls (continous block IO)
 microbenchmark(
   # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F),
   # a <- chunked.read(h5seed, idx, block.size = block.size),
   b <- extract_array(h5seed, idx),
-  c <- region_selection_tiledb(tiledb_dir, "count", c(1,size), c(1,size), cfg@ptr),
-  d <- region_selection_tiledb_sparse(tiledb_sparse_dir, "count", c(1,size), c(1,size), cfg@ptr)
+  c <- region_selection_tiledb(tiledb_dir, "count", c(1,size), c(1,size), ctx@ptr),
+  d <- region_selection_tiledb_sparse(tiledb_sparse_dir, "count", c(1,size), c(1,size), ctx@ptr)
   , times = 5)
-all.equal(b,c)
+all.equal(b,c,d)
 
-#abstract generic API chunked.read
+#' ## generic API chunked.read (capable of both continous and non-continous indexing)
 tileseed <- tiledbArraySeed(tiledb_dir, "count")
-tilesparseseed <- tiledbArraySeed(tiledb_dir, "count", sparse = T)
-# tilearray <- tiledbArray(tileseed)
-dim(tilesparseseed)
+tilesparseseed <- tiledbArraySeed(tiledb_sparse_dir, "count")
+dim(tileseed)
+size <- 1e2
+idx <- list(1:size, 1:size)
+
+#' ## continous indexing through chunked.read
 microbenchmark(
   # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F),
   a <- chunked.read(h5seed, idx, block.size = block.size),
   # b <- extract_array(h5seed, idx),
-  # c <- chunked.read(h5seed, idx, block.size = block.size),
-  d <- chunked.read(tileseed, idx, block.size = block.size)
-  , times = 1)
-all.equal(a,d)
-library(profvis)
-profvis(d <- chunked.read(tileseed, idx, block.size = block.size))
+  c <- chunked.read(tileseed, idx, block.size = block.size),
+  d <- chunked.read(tilesparseseed, idx, block.size = block.size)
+  , times = 5)
+all.equal(a,c)
+
+#' ## random slicing through chunked.read
+set.seed(1)
+size <- 1e2
+nrow <- nrow(h5seed)
+ncol <- ncol(h5seed)
+idx <- list(sample(nrow, size), sample(ncol, size))
+
+microbenchmark(
+  # a <- h5read.chunked(h5gz_gene, "data", idx, block.size = block.size, fast = F),
+  a <- chunked.read(h5seed, idx, block.size = block.size),
+  # b <- extract_array(h5seed, idx),
+  c <- chunked.read(tileseed, idx, block.size = block.size),
+  d <- chunked.read(tilesparseseed, idx, block.size = block.size)
+  , times = 5)
+all.equal(a,c)
+
+# library(profvis)
+# profvis(d <- chunked.read(tileseed, idx, block.size = block.size))
+
+#' ## common DelayedArray operation (colSums and rowSums)
+tilearray <- tiledbArray(tileseed)
+tilesparsearray <- tiledbArray(tilesparseseed)
+cidx <- sample(ncol, 50)
+microbenchmark(
+  a <- colSums(h5array[, cidx])
+, b <- colSums(tilearray[, cidx])
+, c <- colSums(tilesparsearray[, cidx])
+, times = 5)
+all.equal(a,b,c)
+
+ridx <- sample(nrow, 1e2)
+microbenchmark(
+  a <- rowSums(h5array[ridx, cidx])
+  , b <- rowSums(tilearray[ridx, cidx])
+  , c <- rowSums(tilesparsearray[ridx, cidx])
+  , times = 5)
+all.equal(a,b,c)
