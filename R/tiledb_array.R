@@ -10,6 +10,7 @@ setClass("tiledbArraySeed",
            , first_val="ANY"            # First value in the dataset.
            # , chunkdim="integer_OR_NULL"
            , sparse  = "logical"
+           , ctx = "Ctx"
          )
 )
 
@@ -19,15 +20,12 @@ is.sparse <- function(x){
 chunk_selection.tiledbArraySeed <- function(x, chunk_idx)
 {
   nrow <- dim(x)[1]
-  cfg <- tiledb:::Config()
-  cfg["vfs.num_threads"] <- 1
-  cfg["vfs.file.max_parallel_ops"] <- 1
-  ctx <- tiledb::Ctx(cfg)
+  
   res <- lapply(chunk_idx, function(j){
     if(is.sparse(x))
-      region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j), ctx@ptr)
+      region_selection_tiledb_sparse(path(x), x@name, c(1,nrow), c(j,j), x@ctx@ptr)
     else
-      region_selection_tiledb(path(x), x@name, c(1,nrow), c(j,j), ctx@ptr)
+      region_selection_tiledb(path(x), x@name, c(1,nrow), c(j,j), x@ctx@ptr)
   })
   
   do.call(cbind, res)
@@ -105,6 +103,7 @@ tiledbArraySeed <- function(filepath, name, type=NA)
        dim=dim,
        first_val=first_val
        ,sparse=sparse
+       , ctx = ctx
        )
 }
 
