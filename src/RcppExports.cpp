@@ -63,6 +63,20 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// h5read_region
+NumericMatrix h5read_region(std::string filename, std::string ds_name, std::vector<int> ridx, std::vector<int> cidx);
+RcppExport SEXP _singleCell_h5read_region(SEXP filenameSEXP, SEXP ds_nameSEXP, SEXP ridxSEXP, SEXP cidxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type ds_name(ds_nameSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< std::vector<int> >::type cidx(cidxSEXP);
+    rcpp_result_gen = Rcpp::wrap(h5read_region(filename, ds_name, ridx, cidx));
+    return rcpp_result_gen;
+END_RCPP
+}
 // create_tiledb
 void create_tiledb(std::string dbdir, std::string attr, std::vector<int> row_domain, std::vector<int> col_domain, std::vector<unsigned> tile_extend, bool isSparse);
 RcppExport SEXP _singleCell_create_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP row_domainSEXP, SEXP col_domainSEXP, SEXP tile_extendSEXP, SEXP isSparseSEXP) {
@@ -79,8 +93,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // region_selection_tiledb
-NumericMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Context> ctx);
-RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP ctxSEXP) {
+NumericMatrix region_selection_tiledb(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Context> ctx_ptr);
+RcppExport SEXP _singleCell_region_selection_tiledb(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP ctx_ptrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,14 +102,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type ridx(ridxSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type cidx(cidxSEXP);
-    Rcpp::traits::input_parameter< XPtr<tiledb::Context> >::type ctx(ctxSEXP);
-    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx, ctx));
+    Rcpp::traits::input_parameter< XPtr<tiledb::Context> >::type ctx_ptr(ctx_ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb(dbdir, attr, ridx, cidx, ctx_ptr));
     return rcpp_result_gen;
 END_RCPP
 }
 // region_selection_tiledb_sparse
-NumericMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Context> ctx);
-RcppExport SEXP _singleCell_region_selection_tiledb_sparse(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP ctxSEXP) {
+NumericMatrix region_selection_tiledb_sparse(std::string dbdir, std::string attr, std::vector<int> ridx, std::vector<int> cidx, XPtr<tiledb::Context> ctx_ptr);
+RcppExport SEXP _singleCell_region_selection_tiledb_sparse(SEXP dbdirSEXP, SEXP attrSEXP, SEXP ridxSEXP, SEXP cidxSEXP, SEXP ctx_ptrSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -103,8 +117,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type attr(attrSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type ridx(ridxSEXP);
     Rcpp::traits::input_parameter< std::vector<int> >::type cidx(cidxSEXP);
-    Rcpp::traits::input_parameter< XPtr<tiledb::Context> >::type ctx(ctxSEXP);
-    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb_sparse(dbdir, attr, ridx, cidx, ctx));
+    Rcpp::traits::input_parameter< XPtr<tiledb::Context> >::type ctx_ptr(ctx_ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(region_selection_tiledb_sparse(dbdir, attr, ridx, cidx, ctx_ptr));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -159,6 +173,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_singleCell_h5write1", (DL_FUNC) &_singleCell_h5write1, 4},
     {"_singleCell_h5read1", (DL_FUNC) &_singleCell_h5read1, 3},
     {"_singleCell_h5read2", (DL_FUNC) &_singleCell_h5read2, 5},
+    {"_singleCell_h5read_region", (DL_FUNC) &_singleCell_h5read_region, 4},
     {"_singleCell_create_tiledb", (DL_FUNC) &_singleCell_create_tiledb, 6},
     {"_singleCell_region_selection_tiledb", (DL_FUNC) &_singleCell_region_selection_tiledb, 5},
     {"_singleCell_region_selection_tiledb_sparse", (DL_FUNC) &_singleCell_region_selection_tiledb_sparse, 5},

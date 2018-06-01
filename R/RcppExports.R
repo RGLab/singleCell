@@ -17,16 +17,20 @@ h5read2 <- function(filename, ds_name, src_colIndx, mat, dest_colIndx) {
     invisible(.Call('_singleCell_h5read2', PACKAGE = 'singleCell', filename, ds_name, src_colIndx, mat, dest_colIndx))
 }
 
+h5read_region <- function(filename, ds_name, ridx, cidx) {
+    .Call('_singleCell_h5read_region', PACKAGE = 'singleCell', filename, ds_name, ridx, cidx)
+}
+
 create_tiledb <- function(dbdir, attr, row_domain, col_domain, tile_extend, isSparse = FALSE) {
     invisible(.Call('_singleCell_create_tiledb', PACKAGE = 'singleCell', dbdir, attr, row_domain, col_domain, tile_extend, isSparse))
 }
 
-region_selection_tiledb <- function(dbdir, attr, ridx, cidx, ctx) {
-    .Call('_singleCell_region_selection_tiledb', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx, ctx)
+region_selection_tiledb <- function(dbdir, attr, ridx, cidx, ctx_ptr) {
+    .Call('_singleCell_region_selection_tiledb', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx, ctx_ptr)
 }
 
-region_selection_tiledb_sparse <- function(dbdir, attr, ridx, cidx, ctx) {
-    .Call('_singleCell_region_selection_tiledb_sparse', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx, ctx)
+region_selection_tiledb_sparse <- function(dbdir, attr, ridx, cidx, ctx_ptr) {
+    .Call('_singleCell_region_selection_tiledb_sparse', PACKAGE = 'singleCell', dbdir, attr, ridx, cidx, ctx_ptr)
 }
 
 tiledb_query <- function(ctx, uri, type) {

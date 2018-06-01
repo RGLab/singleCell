@@ -25,7 +25,7 @@ chunk_selection.HDF5ArraySeed <- function(x, chunk_idx)
 #' @param x DelayedArray seed object that supports 'dim' and 'chunk_selection'
 #' @param idx row and col index
 #' @export
-chunked.read<- function(x, idx, verbose = FALSE, mc.cores = 1, fast = FALSE, ...){
+chunked.read<- function(x, idx, verbose = FALSE, mc.cores = 1, fast = FALSE, stats = NULL, ...){
   require(parallel)
   ridx <- idx[[1]]
   cidx <- idx[[2]]
@@ -68,7 +68,10 @@ chunked.read<- function(x, idx, verbose = FALSE, mc.cores = 1, fast = FALSE, ...
       sub <- chunk_selection(x, orig.idx)
       if(!is.null(ridx))
         sub <- sub[ridx,, drop = FALSE ]
-      sub
+      if(is.null(stats))
+        sub
+      else
+        stats(sub)
     }
   }
   # , mc.cores = mc.cores
@@ -78,5 +81,11 @@ chunked.read<- function(x, idx, verbose = FALSE, mc.cores = 1, fast = FALSE, ...
   if(fast)
     mat
   else
-    do.call(cbind,res)#TODO:this is a significant overhead (sometime cost 50% cpu time)and we should switch to the pre-allocate approach
+  {
+    if(is.null(stats))
+      do.call(cbind,res)#TODO:this is a significant overhead (sometime cost 50% cpu time)and we should switch to the pre-allocate approach
+    else
+      unlist(res)
+  }
+    
 }
