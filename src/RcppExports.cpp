@@ -156,6 +156,16 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// print_schema
+void print_schema(std::string dbdir);
+RcppExport SEXP _singleCell_print_schema(SEXP dbdirSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type dbdir(dbdirSEXP);
+    print_schema(dbdir);
+    return R_NilValue;
+END_RCPP
+}
 // tiledb_dim
 IntegerVector tiledb_dim(std::string dbdir);
 RcppExport SEXP _singleCell_tiledb_dim(SEXP dbdirSEXP) {
@@ -180,6 +190,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_singleCell_tiledb_query", (DL_FUNC) &_singleCell_tiledb_query, 3},
     {"_singleCell_tiledb_query_set_coordinates", (DL_FUNC) &_singleCell_tiledb_query_set_coordinates, 2},
     {"_singleCell_tiledb_query_finalize", (DL_FUNC) &_singleCell_tiledb_query_finalize, 1},
+    {"_singleCell_print_schema", (DL_FUNC) &_singleCell_print_schema, 1},
     {"_singleCell_tiledb_dim", (DL_FUNC) &_singleCell_tiledb_dim, 1},
     {NULL, NULL, 0}
 };

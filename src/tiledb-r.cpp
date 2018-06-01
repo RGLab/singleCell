@@ -61,6 +61,15 @@ void tiledb_query_finalize(XPtr<tiledb::Query> query) {
 }
 
 // [[Rcpp::export]]
+void print_schema(std::string dbdir)
+{
+  
+  tiledb::Context ctx;
+  tiledb::ArraySchema schema(ctx, dbdir);
+  schema.dump();
+  
+}
+// [[Rcpp::export]]
 IntegerVector tiledb_dim(std::string dbdir)
 {
   tiledb::Context ctx;

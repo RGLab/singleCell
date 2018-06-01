@@ -1,11 +1,11 @@
 #' write tile db as dense matrix from dense matrix
 #' 
 #' @export
-write_tiledb_dense <- function(mat, tiledb_dir, tiledb_attr){
+write_tiledb_dense <- function(mat, tiledb_dir, tiledb_attr, tile_extend){
   nrow <- nrow(mat)
   ncol <- ncol(mat)
   if(!dir.exists(tiledb_dir))
-    create_tiledb(tiledb_dir, tiledb_attr, row_domain = c(1,nrow), col_domain = c(1, ncol), tile_extend = c(nrow, 1))#tile by col
+    create_tiledb(tiledb_dir, tiledb_attr, row_domain = c(1,nrow), col_domain = c(1, ncol), tile_extend = tile_extend)
   
   ctx <- tiledb::Ctx()
   qry <- tiledb_query(ctx@ptr, tiledb_dir, "WRITE") 

@@ -45,6 +45,10 @@ tiledb_query_finalize <- function(query) {
     invisible(.Call('_singleCell_tiledb_query_finalize', PACKAGE = 'singleCell', query))
 }
 
+print_schema <- function(dbdir) {
+    invisible(.Call('_singleCell_print_schema', PACKAGE = 'singleCell', dbdir))
+}
+
 tiledb_dim <- function(dbdir) {
     .Call('_singleCell_tiledb_dim', PACKAGE = 'singleCell', dbdir)
 }
