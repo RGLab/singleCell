@@ -46,7 +46,20 @@ if (dir.exists(tiledb_dir)) {
 # }
 # 
 # # write_tiledb_dense(h5array, tiledb_dir, "count")
-write_tiledb_dense(h5array[1:1e2, 1:1e3], tiledb_dir, "count", c(1e2, 1))
-all.equal(extract_array(h5array, list(1:1e2, 1:1e3)), region_selection_tiledb(tiledb_dir, "count", 1e2, 1e3,))
+
+cfg <- tiledb:::Config()
+num_threads <- 4
+cfg["vfs.num_threads"] <- num_threads
+cfg["vfs.file.max_parallel_ops"] <- num_threads
+
+
+write_tiledb_dense(h5array[1:1e2, 1:1e2], tiledb_dir, "count", c(20, 20))
+ctx <- tiledb::Ctx(cfg)
+tilearray<- tiledb::TileArray.load(ctx, tiledb_dir)
+
+all.equal(extract_array(h5array, list(1:90, 1:1e2)), tilearray[1:90, 1:1e2])
 # 
 # write_tiledb_sparse(h5seed, tiledb_sparse_dir, "count")
+
+
+
